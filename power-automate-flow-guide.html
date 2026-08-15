@@ -313,7 +313,7 @@ ul.plain li{margin-bottom:7px;}
     <h1>สร้าง Flow แจ้งเตือน Job ค้างเข้า Teams ทุกเช้า 08:00</h1>
     <p>คู่มือสำหรับคนที่ไม่เคยสร้าง Flow มาก่อน — ทำตามทีละขั้น กดปุ่ม <b>คัดลอก</b> แล้ววางได้เลย ไม่ต้องพิมพ์สูตรเอง</p>
     <ul class="facts">
-      <li>10 ขั้นตอน</li>
+      <li>9 ขั้นตอน</li>
       <li>ใช้เวลา ~40 นาที</li>
       <li>ไม่ต้องเขียนโค้ด</li>
       <li>ฟรี ไม่ต้องซื้อ Premium</li>
@@ -335,8 +335,7 @@ ul.plain li{margin-bottom:7px;}
       <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Filter Critical / Major / Minor</b> — แยกกอง เอาไว้นับ KPI <em>ขั้นที่ 5</em></span></li>
       <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Compose_Top_Jobs</b> — ต่อ 3 กองแล้วตัดเหลือ 12 แถว <em>ขั้นที่ 6</em></span></li>
       <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Select Job Rows</b> — แปลงข้อมูลเป็นแถวตารางของการ์ด <em>ขั้นที่ 7</em></span></li>
-      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Condition</b> — มีงานค้างไหม <em>ขั้นที่ 8</em></span></li>
-      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Post adaptive card</b> — ส่งการ์ดเข้า Teams <em>ขั้นที่ 9–10</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Post adaptive card</b> — ส่งการ์ดเข้า Teams ทุกวัน ไม่มีเงื่อนไข <em>ขั้นที่ 8–9</em></span></li>
     </ol>
   </div>
 </section>
@@ -375,7 +374,7 @@ ul.plain li{margin-bottom:7px;}
       <li><label><input type="checkbox" data-ck="p1"><span>ไฟล์ <code>JobMonitor_CMTRS_Job_Tracking.xlsx</code> อยู่บน <b>SharePoint หรือ OneDrive for Business</b> (เก็บในเครื่องตัวเองใช้ไม่ได้)</span></label></li>
       <li><label><input type="checkbox" data-ck="p2"><span>เปิดไฟล์ → เลือก <code>A1:AE118</code> → <code>Insert</code> › <code>Table</code> → ติ๊ก <b>My table has headers</b></span></label></li>
       <li><label><input type="checkbox" data-ck="p3"><span>ตั้งชื่อตารางว่า <code>JobTracking</code> ที่ <code>Table Design</code> › <code>Table Name</code> แล้วบันทึก</span></label></li>
-      <li><label><input type="checkbox" data-ck="p4"><span>มีไฟล์ JSON 4 ไฟล์อยู่ใกล้มือ: <code>01</code> การ์ดหลัก · <code>02</code> แถวตาราง · <code>06</code> การ์ดตอนไม่มีงาน · (<code>07</code> ถ้าอยากได้เวอร์ชันมือถือ)</span></label></li>
+      <li><label><input type="checkbox" data-ck="p4"><span>มีไฟล์ JSON อยู่ใกล้มือ: <code>01</code> การ์ดหลัก · <code>02</code> แถวตาราง · (<code>07</code> ถ้าอยากได้เวอร์ชันมือถือ)</span></label></li>
       <li><label><input type="checkbox" data-ck="p5"><span>รู้แล้วว่าจะส่งเข้า <b>Team ไหน Channel ไหน</b> และตัวเองมีสิทธิ์โพสต์ในนั้น</span></label></li>
       <li><label><input type="checkbox" data-ck="p6"><span>มี URL ของ Dashboard และ URL ไฟล์ Excel ไว้ใส่ปุ่มบนการ์ด</span></label></li>
     </ul>
@@ -522,20 +521,31 @@ ul.plain li{margin-bottom:7px;}
   <div class="step">
     <div class="rail">8</div>
     <div class="body">
-      <h2>กันการ์ดเปล่า</h2>
-      <div class="action-tag">Action · <b>Condition</b></div>
-      <p>วันไหนไม่มีงานค้างเลย เราไม่อยากส่งตารางว่าง ๆ เข้า Teams ให้ตั้งเงื่อนไขดังนี้</p>
-      <div class="tablewrap"><table>
-        <thead><tr><th>ช่องซ้าย</th><th>เงื่อนไข</th><th>ช่องขวา</th></tr></thead>
-        <tbody><tr><td><code>length(body('Filter_Open_Jobs'))</code><br><span style="font-size:13px;color:var(--ink-soft)">(ใส่ผ่านแท็บ Expression)</span></td><td>is greater than</td><td><code>0</code></td></tr></tbody>
-      </table></div>
+      <h2>ใส่บรรทัดสรุปท้ายตาราง</h2>
+      <div class="action-tag">Action · <b>Compose</b> → ชื่อ <b>Compose_Rows_Footer</b></div>
+      <p>Flow นี้ <b>ไม่มี Condition</b> — ยิงการ์ดทุกวันไม่ว่าจะมีงานหรือไม่มี ปัญหาคือวันที่ไม่มีงานเลย Container ของตารางจะเหลือ <code>"items": []</code> ว่างเปล่า ซึ่งทำให้ Teams ไม่เรนเดอร์การ์ด</p>
+      <p>วิธีกันคือใส่ TextBlock สรุป 1 บรรทัดต่อท้ายเสมอ Container จึงไม่มีทางว่าง วางก้อนนี้ในช่อง Inputs:</p>
+      <div class="snippet"><header><span class="label">Inputs — วางทั้งก้อน (เป็น array)</span><button class="copy" type="button">คัดลอก</button></header><pre>[
+  {
+    "type": "TextBlock",
+    "text": "แสดง __TOTAL__ จาก __OPEN__ รายการ · Critical __CRIT__ · Major __MAJ__ · Minor __MIN__",
+    "size": "Small",
+    "weight": "Bolder",
+    "isSubtle": true,
+    "wrap": true,
+    "separator": true,
+    "spacing": "Medium"
+  }
+]</pre></div>
+      <p>แล้วให้ Compose ที่ประกอบการ์ดแทนค่า <code>"__ROWS__"</code> ด้วยแถวงาน <b>บวก</b> บรรทัดนี้:</p>
+      <div class="snippet"><header><span class="label">ส่วนหนึ่งของ Compose_Card_JSON</span><button class="copy" type="button">คัดลอก</button></header><pre>concat(body('Select_Job_Rows'),outputs('Compose_Rows_Footer'))</pre></div>
     </div>
   </div>
 
   <div class="step">
     <div class="rail">9</div>
     <div class="body">
-      <h2>สาขา If yes — ส่งการ์ดจริง</h2>
+      <h2>ส่งการ์ดเข้า Teams</h2>
       <div class="action-tag">Action · <b>Post adaptive card in a chat or channel</b> (Microsoft Teams)</div>
       <div class="tablewrap"><table>
         <thead><tr><th>ช่อง</th><th>ใส่ค่า</th></tr></thead>
@@ -553,19 +563,30 @@ ul.plain li{margin-bottom:7px;}
 ]</pre></div>
       <div class="note stop">
         <span class="tt">อย่าเอาไฟล์ 01 ไปวางใน Adaptive Cards Designer</span>
-        <p>ไฟล์ <code>01</code> และ <code>06</code> ตั้งใจเขียนให้ <b>ไม่ใช่ JSON มาตรฐาน</b> เพราะมีบรรทัด <code>"items": @{body('Select_Job_Rows')}</code> ที่ไม่มีคำพูดครอบ Designer จะฟ้อง error ทันที — ถ้าอยากแก้ดีไซน์ให้ใช้ <code>03-adaptive-card-templating.json</code> คู่กับ <code>04-sample-data.json</code> แทน</p>
+        <p>ไฟล์ <code>01</code> ตั้งใจเขียนให้ <b>ไม่ใช่ JSON มาตรฐาน</b> เพราะมีบรรทัด <code>"items": @{body('Select_Job_Rows')}</code> ที่ไม่มีคำพูดครอบ Designer จะฟ้อง error ทันที — ถ้าอยากแก้ดีไซน์ให้ใช้ <code>03-adaptive-card-templating.json</code> คู่กับ <code>04-sample-data.json</code> แทน</p>
       </div>
+      <p>ต่อกล่องนี้ตรงจาก <code>Compose_Card_JSON</code> ได้เลย <b>ไม่ต้องมี Condition คั่น</b> เสร็จแล้วกด <b>Save</b> มุมขวาบน → <b>Test</b> › <b>Manually</b> เพื่อลองยิงดูทันทีโดยไม่ต้องรอ 8 โมง</p>
     </div>
   </div>
+</section>
 
-  <div class="step">
-    <div class="rail">10</div>
-    <div class="body">
-      <h2>สาขา If no — บอกว่าวันนี้เคลียร์หมด</h2>
-      <div class="action-tag">Action · <b>Post adaptive card in a chat or channel</b></div>
-      <p>ตั้งค่าเหมือนขั้นที่ 9 ทุกอย่าง เปลี่ยนแค่ช่อง Adaptive Card เป็นเนื้อหาไฟล์ <code>06-adaptive-card-empty-state.json</code> ซึ่งเป็นการ์ดสั้น ๆ แจ้งว่าไม่มีงานค้าง</p>
-      <p>เสร็จแล้วกด <b>Save</b> มุมขวาบน → กด <b>Test</b> › <b>Manually</b> เพื่อลองยิงดูทันทีโดยไม่ต้องรอ 8 โมง</p>
-    </div>
+<section id="nocondition">
+  <div class="section-head">
+    <h2>ทำไมถึงไม่ใช้ Condition</h2>
+    <p class="lede" style="margin-bottom:0">Flow เวอร์ชันนี้เดินเป็นเส้นตรงเส้นเดียว 16 กล่อง จาก Excel ถึง Teams — ไม่มีการแตกสาขาเลย</p>
+  </div>
+  <p>เดิม Flow มี Condition <code>Has Open Jobs</code> คอยเช็กว่ามีงานค้างไหมแล้วค่อยแตกเป็นสองสาขา ปัญหาคือมันเพิ่มจุดพังโดยไม่จำเป็น: ถ้าชื่อ Action ในสูตร <code>length(body('Filter_Open_Jobs'))</code> ไม่ตรง เงื่อนไขจะพังทั้งก้อนและไม่มีการ์ดออกไปเลยสักใบ ทั้งที่ข้อมูลดึงมาสำเร็จแล้ว</p>
+  <p>ตัดออกแล้วรายงานตรง ๆ ง่ายกว่าและพังยากกว่า วันที่ไม่มีงานก็ได้การ์ดที่บอกว่า <b>แสดง 0 จาก 0 รายการ</b> ซึ่งก็ยังเป็นข้อมูลที่มีประโยชน์ — รู้ว่า Flow ทำงานอยู่ ไม่ได้เงียบหาย</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>สถานการณ์</th><th>ผลลัพธ์ (ทดสอบแล้ว)</th></tr></thead>
+    <tbody>
+      <tr><td>วันปกติ · 125 แถวในไฟล์</td><td>การ์ด 18.8 KB · 12 แถวงาน + 1 บรรทัดสรุป · ขึ้น Critical ก่อน</td></tr>
+      <tr><td>ไม่มีงานเลย · ตารางว่าง</td><td>การ์ด 2.5 KB · หัวตาราง + บรรทัด <i>แสดง 0 จาก 0 รายการ</i> · Teams เรนเดอร์ปกติ</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note warn">
+    <span class="tt">จุดเดียวที่ต้องระวังเมื่อไม่มี Condition</span>
+    <p>ห้ามปล่อยให้ Container ของตารางมี <code>"items": []</code> เพราะ Teams จะไม่เรนเดอร์การ์ดทั้งใบ — ขั้นที่ 8 (<code>Compose_Rows_Footer</code>) มีไว้กันเรื่องนี้โดยเฉพาะ อย่าลบทิ้ง</p>
   </div>
 </section>
 
@@ -576,7 +597,8 @@ ul.plain li{margin-bottom:7px;}
       <li><label><input type="checkbox" data-ck="v1"><span>กด <b>Test › Manually</b> แล้วทุกกล่องขึ้นเครื่องหมายถูกสีเขียว</span></label></li>
       <li><label><input type="checkbox" data-ck="v2"><span>การ์ดโผล่ใน Teams <b>จริง ๆ</b> (Flow เขียวไม่ได้แปลว่าการ์ดไปถึง)</span></label></li>
       <li><label><input type="checkbox" data-ck="v3"><span>ตารางในการ์ดมีข้อมูลครบ 8 คอลัมน์ ไม่มีช่องว่างแปลก ๆ</span></label></li>
-      <li><label><input type="checkbox" data-ck="v4"><span>ตัวเลข Critical / Major / Minor บนหัวการ์ดตรงกับที่นับในไฟล์ Excel</span></label></li>
+      <li><label><input type="checkbox" data-ck="v4"><span>ตัวเลข Critical / Major / Minor ในบรรทัดสรุปท้ายตารางตรงกับที่นับในไฟล์ Excel</span></label></li>
+      <li><label><input type="checkbox" data-ck="v8"><span>ไม่มี Action ประเภท <b>Condition</b> เหลืออยู่ใน Flow — ทุกกล่องต่อกันเป็นเส้นตรง</span></label></li>
       <li><label><input type="checkbox" data-ck="v5"><span>กดปุ่ม Dashboard และปุ่มไฟล์ต้นทางบนการ์ดแล้วเปิดได้จริง</span></label></li>
       <li><label><input type="checkbox" data-ck="v6"><span>ภาษาไทยแสดงผลถูกต้อง ไม่กลายเป็น <code>???</code></span></label></li>
       <li><label><input type="checkbox" data-ck="v7"><span>เปิดสวิตช์ Flow เป็น <b>On</b> แล้ว</span></label></li>
@@ -628,7 +650,14 @@ ul.plain li{margin-bottom:7px;}
     <p>การ์ดขึ้นครบทั้ง 8 คอลัมน์ · 12 แถวแรกกลายเป็น <b>Critical 6 งาน ตามด้วย Major 6 งาน</b> · หัวการ์ดสรุปว่า <i>แสดง 12 จาก 125 รายการ · Critical 6 · Major 23 · Minor 96</i> · ขนาดการ์ด <b>19.1 KB</b> ยังห่างลิมิต 28 KB อยู่ 8.9 KB</p>
   </div>
 
-  <p>หรือจะข้ามการแก้มือ ใช้ไฟล์ <code>CMTRS_Daily_Job_Monitor_0800_FIXED.zip</code> ที่แก้ให้แล้วก็ได้ — เข้า Power Automate › <b>My flows</b> › <b>Import</b> › <b>Import Package (Legacy)</b> อัปโหลดไฟล์ → ที่บรรทัด flow กด <b>Select during import</b> เลือก <b>Update</b> แล้วชี้ไป flow เดิม → ผูก connection ของ Excel และ Teams ให้ครบ → <b>Import</b></p>
+  <p>หรือจะข้ามการแก้มือ ใช้ไฟล์ <code>CMTRS_Daily_Job_Monitor_0800_FIXED_v2.zip</code> ที่แก้ให้แล้วก็ได้ — เข้า Power Automate › <b>My flows</b> › <b>Import</b> › <b>Import Package (Legacy)</b> อัปโหลดไฟล์ → ที่บรรทัด flow กด <b>Select during import</b> เลือก <b>Update</b> แล้วชี้ไป flow เดิม → ผูก connection ของ Excel และ Teams ให้ครบ → <b>Import</b></p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>ไฟล์</th><th>ต่างกันตรงไหน</th></tr></thead>
+    <tbody>
+      <tr><td><code>..._FIXED.zip</code></td><td>แก้บั๊กทั้ง 5 ข้อ · ตัวเลขสรุปอยู่บนหัวการ์ด</td></tr>
+      <tr><td><code>..._FIXED_v2.zip</code> ← ใช้ตัวนี้</td><td>เหมือน v1 + <b>ไม่มี Condition</b> เลย ยิงการ์ดทุกวัน + เพิ่ม <code>Compose_Rows_Footer</code> กันการ์ดพังวันที่ไม่มีงาน</td></tr>
+    </tbody>
+  </table></div>
   <div class="note warn"><p>การ์ดที่แก้แล้วยังชี้ไปที่ Group chat และไฟล์ Excel เดิมของคุณ ถ้าเปลี่ยนห้องหรือย้ายไฟล์ ต้องตั้งใหม่ในขั้นที่ 3 และขั้นที่ 9</p></div>
 </section>
 
@@ -648,6 +677,8 @@ ul.plain li{margin-bottom:7px;}
       <tr><td><code>BadRequest: Invalid JSON</code></td><td>เผลอใส่ <code>"</code> ครอบ <code>@{body('Select_Job_Rows')}</code> — ต้องไม่มี</td></tr>
       <tr><td>ภาษาไทยกลายเป็น <code>???</code></td><td>ไฟล์ JSON ต้องบันทึกเป็น UTF-8 แบบไม่มี BOM</td></tr>
       <tr><td>คอลัมน์ Assign to ว่าง (เฉพาะ SharePoint)</td><td>เป็นฟิลด์ Person ต้องใช้ <code>item()?['Assign_x0020_to']?['DisplayName']</code></td></tr>
+      <tr><td>Condition <code>Has Open Jobs</code> พัง / ไม่ส่งการ์ดสักใบ</td><td>ลบ Condition ทิ้งได้เลย แล้วต่อ <code>Post adaptive card</code> ตรงจาก <code>Compose_Card_JSON</code> → ดู <a href="#nocondition">หัวข้อทำไมถึงไม่ใช้ Condition</a></td></tr>
+      <tr><td>วันที่ไม่มีงานแล้วการ์ดหายทั้งใบ</td><td>Container ของตารางเหลือ <code>"items": []</code> → ต้องมี <code>Compose_Rows_Footer</code> ต่อท้ายเสมอ (ขั้นที่ 8)</td></tr>
     </tbody>
   </table></div>
   <h3>สูตรแปลง Excel serial date</h3>
