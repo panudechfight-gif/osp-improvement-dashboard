@@ -573,9 +573,20 @@ summary:hover{background:var(--surface-2)}
         <p class="step-kicker">Data Operation · Filter array</p>
         <h3 class="step-title">กรองเอาเฉพาะงานที่ยังไม่ปิด</h3>
         <div class="chips"><span class="chip">Rename เป็น: Filter Open</span></div>
+        <p class="step-desc">
+          <b>ขั้นตอนการตั้ง From field:</b><br>
+          1. ที่ช่อง <code>From</code> ให้คลิกที่ช่องข้อมูล<br>
+          2. ด้านขวาจะเปิด panel หลังจากให้เลือก dynamic content<br>
+          3. มองหา <code>value</code> — นี่คือชื่อของ output จาก action <code>List_rows_present_in_a_table</code><br>
+          4. ทั้งหมดแถวข้อมูลจาก Excel จะอยู่ใน property นี้ ซึ่งต้องใช้ filter ต่อไป
+        </p>
         <div class="code">
-          <div class="code-head"><span class="code-name">From — เลือก dynamic content ชื่อ value</span><button class="copy">คัดลอก</button></div>
+          <div class="code-head"><span class="code-name">From — ผลลัพธ์เมื่อคลิกเลือก value</span><button class="copy">คัดลอก</button></div>
           <pre>body('List_rows_present_in_a_table')?['value']</pre>
+        </div>
+        <div class="callout is-good" style="margin-top:14px">
+          <h4>ทำไมต้อง .value?</h4>
+          <p>Action "List rows present in a table" คืนผลลัพธ์ที่มี object หลายๆ ส่วน ส่วน <code>value</code> คือตัวที่บรรจุ array แถวจากตาราง — ยึดเอาส่วนนี้เท่านั้น</p>
         </div>
         <div class="code">
           <div class="code-head"><span class="code-name">เงื่อนไข — กด Edit in advanced mode ก่อนวาง</span><button class="copy">คัดลอก</button></div>
@@ -584,8 +595,9 @@ summary:hover{background:var(--surface-2)}
         <ul class="checks">
           <li><label><input type="checkbox" data-k="b4a"><span><b>+ New step</b> → <code>Data Operation</code> → <b>Filter array</b></span></label></li>
           <li><label><input type="checkbox" data-k="b4b"><span>Rename เป็น <code>Filter Open</code></span></label></li>
-          <li><label><input type="checkbox" data-k="b4c"><span>ช่อง From เลือก dynamic content <b>value</b></span></label></li>
-          <li><label><input type="checkbox" data-k="b4d"><span>กด <b>Edit in advanced mode</b> แล้ววางเงื่อนไขด้านบน</span></label></li>
+          <li><label><input type="checkbox" data-k="b4c"><span>กดในช่อง <b>From</b> เพื่อเปิด dynamic content selector</span></label></li>
+          <li><label><input type="checkbox" data-k="b4d"><span>ค้นหาและคลิกที่ <b>value</b> (output property จาก "List rows present in a table")</span></label></li>
+          <li><label><input type="checkbox" data-k="b4e"><span>กด <b>Edit in advanced mode</b> ที่ช่องเงื่อนไข แล้ววางเงื่อนไขด้านบน</span></label></li>
         </ul>
       </article>
 
