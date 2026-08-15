@@ -92,9 +92,9 @@ pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;lin
 
 </div>
 
-<!-- สำเนา template สำหรับเปิดแบบ file:// (ถ้าเปิดผ่าน http จะ fetch จาก 03/04 ให้อัตโนมัติ) -->
+<!-- Embedded template as fallback for file:// access -->
 <script id="fallbackTemplate" type="application/json">
-{"type":"AdaptiveCard","version":"1.4","body":[{"type":"TextBlock","text":"กำลังโหลด template…","wrap":true}]}
+{"type":"AdaptiveCard","$schema":"http://adaptivecards.io/schemas/adaptive-card.json","version":"1.4","msteams":{"width":"Full"},"body":[{"type":"Container","style":"emphasis","bleed":true,"spacing":"None","items":[{"type":"ColumnSet","verticalContentAlignment":"Center","columns":[{"type":"Column","width":"auto","verticalContentAlignment":"Center","items":[{"type":"TextBlock","text":"🛠️","size":"ExtraLarge","spacing":"None"}]},{"type":"Column","width":"stretch","verticalContentAlignment":"Center","items":[{"type":"TextBlock","text":"CM-TRS Job Tracking · Daily Monitor","size":"Large","weight":"Bolder","wrap":true,"spacing":"None"},{"type":"TextBlock","text":"Zone ${zone} · Region ${region} · ประจำวันที่ ${reportDate}","isSubtle":true,"size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"auto","verticalContentAlignment":"Center","items":[{"type":"TextBlock","text":"${total}","size":"ExtraLarge","weight":"Bolder","horizontalAlignment":"Right","spacing":"None"},{"type":"TextBlock","text":"OPEN JOBS","size":"Small","isSubtle":true,"horizontalAlignment":"Right","spacing":"None"}]}]}]},{"type":"ColumnSet","spacing":"Medium","columns":[{"type":"Column","width":"25","style":"attention","spacing":"Small","items":[{"type":"TextBlock","text":"🔴 Critical","size":"Small","weight":"Bolder","horizontalAlignment":"Center","wrap":true,"spacing":"None"},{"type":"TextBlock","text":"${critical}","size":"ExtraLarge","weight":"Bolder","horizontalAlignment":"Center","spacing":"None"}]},{"type":"Column","width":"25","style":"warning","spacing":"Small","items":[{"type":"TextBlock","text":"🟠 Major","size":"Small","weight":"Bolder","horizontalAlignment":"Center","wrap":true,"spacing":"None"},{"type":"TextBlock","text":"${major}","size":"ExtraLarge","weight":"Bolder","horizontalAlignment":"Center","spacing":"None"}]},{"type":"Column","width":"25","style":"accent","spacing":"Small","items":[{"type":"TextBlock","text":"🟡 Minor","size":"Small","weight":"Bolder","horizontalAlignment":"Center","wrap":true,"spacing":"None"},{"type":"TextBlock","text":"${minor}","size":"ExtraLarge","weight":"Bolder","horizontalAlignment":"Center","spacing":"None"}]},{"type":"Column","width":"25","style":"emphasis","spacing":"Small","items":[{"type":"TextBlock","text":"📋 Showing","size":"Small","weight":"Bolder","horizontalAlignment":"Center","wrap":true,"spacing":"None"},{"type":"TextBlock","text":"${shown}","size":"ExtraLarge","weight":"Bolder","horizontalAlignment":"Center","spacing":"None"}]}]},{"type":"TextBlock","text":"**Status:** ${statusBreakdown}","wrap":true,"size":"Small","isSubtle":true,"spacing":"Small"},{"type":"Container","style":"emphasis","spacing":"Medium","items":[{"type":"ColumnSet","columns":[{"type":"Column","width":"15","items":[{"type":"TextBlock","text":"Sub System","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"16","items":[{"type":"TextBlock","text":"Job ID","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"11","items":[{"type":"TextBlock","text":"Priority","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"14","items":[{"type":"TextBlock","text":"Create Time","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"12","items":[{"type":"TextBlock","text":"Status","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"11","items":[{"type":"TextBlock","text":"Province Name","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"21","items":[{"type":"TextBlock","text":"Site Name","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"16","items":[{"type":"TextBlock","text":"Assign to","weight":"Bolder","size":"Small","wrap":true,"spacing":"None"}]}]}]},{"type":"Container","spacing":"None","items":[{"type":"ColumnSet","$data":"${jobs}","separator":true,"spacing":"Small","columns":[{"type":"Column","width":"15","items":[{"type":"TextBlock","text":"${$data['Sub System']}","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"16","items":[{"type":"TextBlock","text":"${$data['Job ID']}","size":"Small","weight":"Bolder","wrap":true,"spacing":"None"}]},{"type":"Column","width":"11","items":[{"type":"TextBlock","text":"${if($data['Priority'] == 'Critical', '🔴 ', if($data['Priority'] == 'Major', '🟠 ', '🟡 '))}${$data['Priority']}","size":"Small","weight":"Bolder","wrap":true,"spacing":"None","color":"${if($data['Priority'] == 'Critical', 'attention', if($data['Priority'] == 'Major', 'warning', 'default'))}"}]},{"type":"Column","width":"14","items":[{"type":"TextBlock","text":"${$data['Create Time']}","size":"Small","wrap":true,"spacing":"None","isSubtle":true}]},{"type":"Column","width":"12","items":[{"type":"TextBlock","text":"${$data['Status']}","size":"Small","weight":"Bolder","wrap":true,"spacing":"None","color":"${if($data['Status'] == 'Interupted', 'attention', if($data['Status'] == 'Held', 'warning', if($data['Status'] == 'On-Site', 'good', if($data['Status'] == 'Departed', 'good', 'accent'))))}"}]},{"type":"Column","width":"11","items":[{"type":"TextBlock","text":"${$data['Province Name']}","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"21","items":[{"type":"TextBlock","text":"${$data['Site Name']}","size":"Small","wrap":true,"spacing":"None"}]},{"type":"Column","width":"16","items":[{"type":"TextBlock","text":"${$data['Assign to']}","size":"Small","wrap":true,"spacing":"None","isSubtle":true}]}]}]},{"type":"TextBlock","text":"⚠️ แสดง ${shown} รายการแรก (เรียงตาม Priority) · ยังมีอีก **${more}** รายการ — เปิดดูทั้งหมดได้ที่ปุ่มด้านล่าง","wrap":true,"size":"Small","color":"Warning","spacing":"Medium","$when":"${more > 0}"},{"type":"TextBlock","text":"🤖 Generated by Power Automate · Run time ${runTime} (Asia/Bangkok)","wrap":true,"size":"Small","isSubtle":true,"spacing":"Small"}]}
 </script>
 
 <script>
@@ -116,10 +116,11 @@ async function boot(){
     template = tpl;
     rawRows = sample.jobs;
   }catch(err){
-    // เปิดจาก file:// → fetch ถูกบล็อก
+    // เปิดจาก file:// → fetch ถูกบล็อก → ใช้ embedded fallback template แทน
     template = JSON.parse(document.getElementById('fallbackTemplate').textContent);
     rawRows = [];
-    note('เปิดไฟล์นี้ผ่าน http (เช่น <code>npx serve</code> หรือ GitHub Pages) เพื่อให้โหลด template ได้ หรือกดเลือกไฟล์ .xlsx เพื่อใช้ข้อมูลของคุณเอง', 'bad');
+    console.log('Loaded from fallback template (fetch failed):', err.message);
+    note('⚠️ ไม่สามารถโหลดข้อมูลตัวอย่างได้ — กรุณาโหลดไฟล์ <code>.xlsx</code> ของคุณเองเพื่อดูการ์ดจริง', 'bad');
   }
   render();
 }
@@ -179,62 +180,119 @@ function buildData(){
 }
 
 /* ---------- แถวแบบ mobile (เทียบเท่า 07-row-template-mobile.json) ---------- */
-const MOBILE_ROW = {
-  type: 'Container',
-  $data: '${jobs}',
-  separator: true,
-  spacing: 'Small',
-  items: [
+const MOBILE_ROW_JSON = `{
+  "type": "Container",
+  "$data": "\${jobs}",
+  "separator": true,
+  "spacing": "Small",
+  "items": [
     {
-      type: 'ColumnSet',
-      spacing: 'None',
-      columns: [
-        { type:'Column', width:'auto', items:[
-          { type:'TextBlock', spacing:'None',
-            text: "${if($data['Priority'] == 'Critical', '🔴', if($data['Priority'] == 'Major', '🟠', '🟡'))}" } ] },
-        { type:'Column', width:'stretch', items:[
-          { type:'TextBlock', weight:'Bolder', wrap:true, spacing:'None',
-            text: "${$data['Job ID']} · ${$data['Sub System']}",
-            color: "${if($data['Priority'] == 'Critical', 'attention', if($data['Priority'] == 'Major', 'warning', 'default'))}" } ] },
-        { type:'Column', width:'auto', items:[
-          { type:'TextBlock', size:'Small', weight:'Bolder', horizontalAlignment:'Right', wrap:true, spacing:'None',
-            text: "${$data['Status']}",
-            color: "${if($data['Status'] == 'Interupted', 'attention', if($data['Status'] == 'Held', 'warning', if($data['Status'] == 'On-Site', 'good', if($data['Status'] == 'Departed', 'good', 'accent'))))}" } ] }
+      "type": "ColumnSet",
+      "spacing": "None",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "spacing": "None",
+              "text": "\${if($data['Priority'] == 'Critical', '🔴', if($data['Priority'] == 'Major', '🟠', '🟡'))}"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "weight": "Bolder",
+              "wrap": true,
+              "spacing": "None",
+              "text": "\${$data['Job ID']} · \${$data['Sub System']}",
+              "color": "\${if($data['Priority'] == 'Critical', 'attention', if($data['Priority'] == 'Major', 'warning', 'default'))}"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "size": "Small",
+              "weight": "Bolder",
+              "horizontalAlignment": "Right",
+              "wrap": true,
+              "spacing": "None",
+              "text": "\${$data['Status']}",
+              "color": "\${if($data['Status'] == 'Interupted', 'attention', if($data['Status'] == 'Held', 'warning', if($data['Status'] == 'On-Site', 'good', if($data['Status'] == 'Departed', 'good', 'accent'))))}"
+            }
+          ]
+        }
       ]
     },
-    { type:'TextBlock', size:'Small', wrap:true, spacing:'None',
-      text: "📍 ${$data['Site Name']} · ${$data['Province Name']}" },
-    { type:'TextBlock', size:'Small', isSubtle:true, wrap:true, spacing:'None',
-      text: "🕗 ${$data['Create Time']}　👷 ${$data['Assign to']}" }
+    {
+      "type": "TextBlock",
+      "size": "Small",
+      "wrap": true,
+      "spacing": "None",
+      "text": "📍 \${$data['Site Name']} · \${$data['Province Name']}"
+    },
+    {
+      "type": "TextBlock",
+      "size": "Small",
+      "isSubtle": true,
+      "wrap": true,
+      "spacing": "None",
+      "text": "🕗 \${$data['Create Time']}　👷 \${$data['Assign to']}"
+    }
   ]
-};
+}`;
+const MOBILE_ROW = JSON.parse(MOBILE_ROW_JSON);
 
 /** คืน template ตาม layout ที่เลือก: table = ตาม 03 ตรง ๆ, mobile = ตัดหัวตารางออกแล้วสลับแถว */
 function templateForLayout(){
+  if(!template || !template.body) return template;
   if(document.getElementById('layout').value !== 'mobile') return template;
 
-  const t = JSON.parse(JSON.stringify(template));
-  const headerIdx = t.body.findIndex(el =>
-    el.type === 'Container' && el.style === 'emphasis' &&
-    JSON.stringify(el).includes('Province Name'));
-  const rowsIdx = t.body.findIndex(el =>
-    el.type === 'Container' && Array.isArray(el.items) && el.items.some(i => i.$data));
+  try{
+    const t = JSON.parse(JSON.stringify(template));
+    const headerIdx = t.body.findIndex(el =>
+      el.type === 'Container' && el.style === 'emphasis' &&
+      JSON.stringify(el).includes('Province Name'));
+    const rowsIdx = t.body.findIndex(el =>
+      el.type === 'Container' && Array.isArray(el.items) && el.items.some(i => i.$data));
 
-  if(rowsIdx > -1) t.body[rowsIdx].items = [MOBILE_ROW];
-  if(headerIdx > -1) t.body.splice(headerIdx, 1);
-  return t;
+    if(rowsIdx > -1) t.body[rowsIdx].items = [JSON.parse(JSON.stringify(MOBILE_ROW))];
+    if(headerIdx > -1) t.body.splice(headerIdx, 1);
+    return t;
+  }catch(e){
+    console.warn('templateForLayout() failed:', e);
+    return template;
+  }
 }
 
 function render(){
-  if(!template) return;
+  if(!template) {
+    note('Template ยังไม่โหลด กรุณารอสักครู่หรือโหลดไฟล์ .xlsx', 'bad');
+    return;
+  }
   const data = buildData();
+  const tmpl = templateForLayout();
+  if(!tmpl || !tmpl.body) {
+    note('Template ไม่ถูกต้อง', 'bad');
+    return;
+  }
 
   let cardJson;
   try{
-    const tpl = new ACData.Template(templateForLayout());
+    const tpl = new ACData.Template(tmpl);
     cardJson = tpl.expand({ $root: data });
   }catch(err){
-    note('Template expand ล้มเหลว: ' + err.message, 'bad');
+    console.error('Template expand error:', err, 'Template:', tmpl);
+    note('Template expand ล้มเหลว: ' + err.message + ' — ลองเปลี่ยน layout หรือโหลดไฟล์ .xlsx ใหม่', 'bad');
     return;
   }
   lastPayload = cardJson;
