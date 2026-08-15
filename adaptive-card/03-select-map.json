@@ -1,0 +1,79 @@
+{
+  "type": "ColumnSet",
+  "separator": true,
+  "spacing": "Small",
+  "columns": [
+    {
+      "type": "Column",
+      "width": "12",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Sub System']}", "size": "Small", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "14",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Job ID']}", "size": "Small", "weight": "Bolder", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "10",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{if(equals(item()?['Priority'],'Critical'),'🔴',if(equals(item()?['Priority'],'Major'),'🟠','🟡'))} @{item()?['Priority']}",
+          "size": "Small",
+          "weight": "Bolder",
+          "wrap": true,
+          "spacing": "None",
+          "color": "@{if(equals(item()?['Priority'],'Critical'),'attention',if(equals(item()?['Priority'],'Major'),'warning','default'))}"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "12",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Create Time']}", "size": "Small", "wrap": true, "spacing": "None", "isSubtle": true }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "10",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{item()?['Status']}",
+          "size": "Small",
+          "weight": "Bolder",
+          "wrap": true,
+          "spacing": "None",
+          "color": "@{if(equals(item()?['Status'],'Held'),'attention',if(equals(item()?['Status'],'Transfered'),'warning',if(or(equals(item()?['Status'],'On-Site'),equals(item()?['Status'],'Departed')),'good',if(equals(item()?['Status'],'Accepted'),'accent','default'))))}"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "9",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Province Name']}", "size": "Small", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "20",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Site Name']}", "size": "Small", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "13",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Assign to']}", "size": "Small", "wrap": true, "spacing": "None", "isSubtle": true }
+      ]
+    }
+  ]
+}

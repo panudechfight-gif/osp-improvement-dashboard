@@ -1,0 +1,165 @@
+{
+  "zone": "RC3-UDN",
+  "region": "NorthEast",
+  "reportDate": "15/08/2026",
+  "runTime": "15/08/2026 08:00",
+  "total": 29,
+  "critical": 6,
+  "major": 23,
+  "minor": 0,
+  "shown": 15,
+  "more": 14,
+  "statusBreakdown": "Assigned 17 · On-Site 7 · Held 2 · Departed 1 · Accepted 1 · Transfered 1",
+  "jobs": [
+    {
+      "subSystem": "FTTH-OSP",
+      "jobId": "JB26-1719735",
+      "priority": "Critical",
+      "createTime": "15-Aug-26 16:43",
+      "status": "Assigned",
+      "provinceName": "อุดรธานี",
+      "siteName": "OLT 3BB ศรีธาตุ HF3017-99",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "EDS-OSP",
+      "jobId": "JB26-1719387",
+      "priority": "Critical",
+      "createTime": "15-Aug-26 15:25",
+      "status": "On-Site",
+      "provinceName": "อุดรธานี",
+      "siteName": "OLT 3BB หนองหาน HF3008-173",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "Transmission-OSP",
+      "jobId": "JB26-1720693",
+      "priority": "Critical",
+      "createTime": "15-Aug-26 19:22",
+      "status": "Departed",
+      "provinceName": "อุดรธานี",
+      "siteName": "ME 3BB ผาสุก ME-3013-42",
+      "assignTo": "Kritsana Janarka"
+    },
+    {
+      "subSystem": "Transmission-OSP",
+      "jobId": "JB26-1716551",
+      "priority": "Critical",
+      "createTime": "15-Aug-26 07:03",
+      "status": "On-Site",
+      "provinceName": "อุดรธานี",
+      "siteName": "ME 3BB ผาสุก ME-3013-42",
+      "assignTo": "Kritsana Mingkwan"
+    },
+    {
+      "subSystem": "Transmission-OSP",
+      "jobId": "JB26-1717864",
+      "priority": "Critical",
+      "createTime": "15-Aug-26 10:37",
+      "status": "On-Site",
+      "provinceName": "อุดรธานี",
+      "siteName": "ME 3BB นาโฮง ME-3003-95",
+      "assignTo": "Thirasak Phomphithak"
+    },
+    {
+      "subSystem": "Transmission-OSP",
+      "jobId": "JB26-1718270",
+      "priority": "Critical",
+      "createTime": "15-Aug-26 11:52",
+      "status": "On-Site",
+      "provinceName": "หนองบัวลำภู",
+      "siteName": "WDM 3BB วิจารรังสรรค์ NE_WAC_3101_033_1H_R",
+      "assignTo": "Somchai Auppara"
+    },
+    {
+      "subSystem": "Power System",
+      "jobId": "JB26-1697375",
+      "priority": "Major",
+      "createTime": "13-Aug-26 00:31",
+      "status": "Assigned",
+      "provinceName": "อุดรธานี",
+      "siteName": "ME 3BB จูมศรี ME-3019-201",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "Power System",
+      "jobId": "JB26-1707540",
+      "priority": "Major",
+      "createTime": "14-Aug-26 06:32",
+      "status": "Assigned",
+      "provinceName": "อุดรธานี",
+      "siteName": "ME 3BB คอนโดเทล ME-3032-36",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "Transmission-OSP",
+      "jobId": "JB26-1710645",
+      "priority": "Major",
+      "createTime": "14-Aug-26 11:38",
+      "status": "Assigned",
+      "provinceName": "อุดรธานี",
+      "siteName": "OLT 3BB ป่าเป้า HF3003-224",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "Splitter-OSP",
+      "jobId": "JB26-1711593",
+      "priority": "Major",
+      "createTime": "14-Aug-26 13:43",
+      "status": "Assigned",
+      "provinceName": "บึงกาฬ",
+      "siteName": "OLT 3BB เจริญสว่าง HF3806-93",
+      "assignTo": "Weerawat Sareesun"
+    },
+    {
+      "subSystem": "Transmission-OSP",
+      "jobId": "JB26-1716335",
+      "priority": "Major",
+      "createTime": "15-Aug-26 05:53",
+      "status": "Assigned",
+      "provinceName": "อุดรธานี",
+      "siteName": "OLT 3BB หนองบัว1 HF3033-565",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "Splitter-OSP",
+      "jobId": "JB26-1717557",
+      "priority": "Major",
+      "createTime": "15-Aug-26 09:53",
+      "status": "Assigned",
+      "provinceName": "อุดรธานี",
+      "siteName": "OLT 3BB ศรีธาตุ HF3017-99",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "Splitter-OSP",
+      "jobId": "JB26-1718222",
+      "priority": "Major",
+      "createTime": "15-Aug-26 11:45",
+      "status": "Assigned",
+      "provinceName": "อุดรธานี",
+      "siteName": "OLT 3BB ไชยวาน HF3006-86",
+      "assignTo": "Satthakit Sunthorntrae"
+    },
+    {
+      "subSystem": "Splitter-OSP",
+      "jobId": "JB26-1718468",
+      "priority": "Major",
+      "createTime": "15-Aug-26 12:31",
+      "status": "Assigned",
+      "provinceName": "เลย",
+      "siteName": "OLT 3BB ภูเรือ HF3406-102",
+      "assignTo": "Somchai Auppara"
+    },
+    {
+      "subSystem": "Splitter-OSP",
+      "jobId": "JB26-1718521",
+      "priority": "Major",
+      "createTime": "15-Aug-26 12:39",
+      "status": "Assigned",
+      "provinceName": "บึงกาฬ",
+      "siteName": "OLT 3BB ศรีวิไล HF3809-68",
+      "assignTo": "Weerawat Sareesun"
+    }
+  ]
+}

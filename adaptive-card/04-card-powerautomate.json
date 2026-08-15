@@ -1,0 +1,188 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.4",
+  "msteams": { "width": "Full" },
+  "body": [
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "bleed": true,
+      "spacing": "None",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "verticalContentAlignment": "Center",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "verticalContentAlignment": "Center",
+              "items": [
+                { "type": "TextBlock", "text": "🛠️", "size": "ExtraLarge", "spacing": "None" }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "verticalContentAlignment": "Center",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "CM-TRS Job Tracking · Daily Monitor",
+                  "size": "Large",
+                  "weight": "Bolder",
+                  "wrap": true,
+                  "spacing": "None"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "Zone @{first(body('Filter_Open'))?['Zone']} · Region @{first(body('Filter_Open'))?['Region']} · ประจำวันที่ @{formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'dd/MM/yyyy')}",
+                  "isSubtle": true,
+                  "size": "Small",
+                  "wrap": true,
+                  "spacing": "None"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "auto",
+              "verticalContentAlignment": "Center",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "@{length(body('Filter_Open'))}",
+                  "size": "ExtraLarge",
+                  "weight": "Bolder",
+                  "horizontalAlignment": "Right",
+                  "spacing": "None"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "OPEN JOBS",
+                  "size": "Small",
+                  "isSubtle": true,
+                  "horizontalAlignment": "Right",
+                  "spacing": "None"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "ColumnSet",
+      "spacing": "Medium",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "attention",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "🔴 Critical", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(body('Filter_Critical'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "warning",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "🟠 Major", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(body('Filter_Major'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "accent",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "🟡 Minor", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(body('Filter_Minor'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "emphasis",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "📋 Showing", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(outputs('Top_Jobs'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "TextBlock",
+      "text": "**Status:** @{outputs('Status_Breakdown')}",
+      "wrap": true,
+      "size": "Small",
+      "isSubtle": true,
+      "spacing": "Small"
+    },
+
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            { "type": "Column", "width": "12", "items": [ { "type": "TextBlock", "text": "Sub System",    "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "14", "items": [ { "type": "TextBlock", "text": "Job ID",        "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "10", "items": [ { "type": "TextBlock", "text": "Priority",      "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "12", "items": [ { "type": "TextBlock", "text": "Create Time",   "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "10", "items": [ { "type": "TextBlock", "text": "Status",        "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "9",  "items": [ { "type": "TextBlock", "text": "Province Name", "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "20", "items": [ { "type": "TextBlock", "text": "Site Name",     "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "13", "items": [ { "type": "TextBlock", "text": "Assign to",     "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "Container",
+      "spacing": "None",
+      "items": @{body('Select_Rows')}
+    },
+
+    {
+      "type": "TextBlock",
+      "text": "@{if(greater(sub(length(body('Filter_Open')),length(outputs('Top_Jobs'))),0), concat('⚠️ แสดง ', string(length(outputs('Top_Jobs'))), ' รายการแรก (เรียงตาม Priority) · ยังมีอีก **', string(sub(length(body('Filter_Open')),length(outputs('Top_Jobs')))), '** รายการ — เปิดดูทั้งหมดได้ที่ปุ่มด้านล่าง'), '✅ แสดงครบทุกรายการแล้ว')}",
+      "wrap": true,
+      "size": "Small",
+      "color": "@{if(greater(sub(length(body('Filter_Open')),length(outputs('Top_Jobs'))),0),'warning','good')}",
+      "spacing": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "🤖 Generated by Power Automate · Run time @{formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'dd/MM/yyyy HH:mm')} (Asia/Bangkok)",
+      "wrap": true,
+      "size": "Small",
+      "isSubtle": true,
+      "spacing": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "📊 เปิด Dashboard",
+      "url": "https://panudechfight-gif.github.io/osp-improvement-dashboard/"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "📁 เปิดไฟล์ต้นทาง (Excel / SharePoint)",
+      "url": "https://contoso.sharepoint.com/sites/NOC/Shared%20Documents/JobMonitor_CMTRS_Job_Tracking.xlsx"
+    }
+  ]
+}
