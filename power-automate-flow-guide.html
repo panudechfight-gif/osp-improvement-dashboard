@@ -1,0 +1,676 @@
+<title>Flow แจ้งเตือน Job ค้าง</title>
+<style>
+:root{
+  --ground:#f4f7ee;
+  --surface:#ffffff;
+  --surface-2:#ecf2e1;
+  --ink:#232e1a;
+  --ink-soft:#5d6a53;
+  --ink-faint:#8b957f;
+  --line:#dce5cd;
+  --line-strong:#c3d2ac;
+  --green:#4e8f1e;
+  --green-bright:#7cb928;
+  --green-wash:#eaf3dc;
+  --orange:#c9620a;
+  --orange-wash:#fdefe0;
+  --danger:#b4342a;
+  --danger-wash:#fbeae8;
+  --code-bg:#1d2618;
+  --code-ink:#dfe9d0;
+  --code-key:#a8d86a;
+  --code-str:#f0b775;
+  --shadow:0 1px 2px rgba(35,46,26,.05), 0 6px 18px -12px rgba(35,46,26,.28);
+
+  --mono:ui-monospace,"SFMono-Regular","JetBrains Mono","Cascadia Mono",Consolas,monospace;
+  --sans:"Sarabun","Noto Sans Thai","IBM Plex Sans Thai",-apple-system,BlinkMacSystemFont,"Segoe UI","Leelawadee UI",Tahoma,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#11160d;
+    --surface:#1a2114;
+    --surface-2:#222b1a;
+    --ink:#e9f0df;
+    --ink-soft:#a5b098;
+    --ink-faint:#7c886e;
+    --line:#2d3823;
+    --line-strong:#3d4b30;
+    --green:#96d444;
+    --green-bright:#7cb928;
+    --green-wash:#1f2b13;
+    --orange:#f0a25a;
+    --orange-wash:#2d2114;
+    --danger:#f0897d;
+    --danger-wash:#2e1815;
+    --code-bg:#0d1209;
+    --code-ink:#d6e2c6;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#11160d;
+  --surface:#1a2114;
+  --surface-2:#222b1a;
+  --ink:#e9f0df;
+  --ink-soft:#a5b098;
+  --ink-faint:#7c886e;
+  --line:#2d3823;
+  --line-strong:#3d4b30;
+  --green:#96d444;
+  --green-bright:#7cb928;
+  --green-wash:#1f2b13;
+  --orange:#f0a25a;
+  --orange-wash:#2d2114;
+  --danger:#f0897d;
+  --danger-wash:#2e1815;
+  --code-bg:#0d1209;
+  --code-ink:#d6e2c6;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.75;
+  -webkit-text-size-adjust:100%;
+}
+.page{max-width:860px;margin:0 auto;padding:0 20px 96px;}
+
+/* ---------- header ---------- */
+.masthead{
+  background:linear-gradient(135deg,#2f5e12 0%,#4e8f1e 55%,#7cb928 100%);
+  color:#f6fdec;
+  padding:44px 0 40px;
+  margin-bottom:40px;
+}
+.masthead .page{padding-bottom:0;}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba(246,253,236,.72);
+  margin:0 0 10px;
+}
+.masthead h1{
+  font-size:clamp(28px,5.2vw,42px);
+  line-height:1.25;
+  font-weight:800;
+  letter-spacing:-.01em;
+  margin:0 0 12px;
+  text-wrap:balance;
+}
+.masthead p{margin:0;max-width:62ch;color:rgba(246,253,236,.9);}
+.facts{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;padding:0;list-style:none;
+}
+.facts li{
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:999px;padding:5px 13px;
+}
+
+/* ---------- generic blocks ---------- */
+section{margin-bottom:56px;}
+h2{
+  font-size:23px;font-weight:800;letter-spacing:-.005em;margin:0 0 6px;text-wrap:balance;
+}
+h2 .num{
+  font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);
+  margin-inline-end:10px;letter-spacing:.02em;
+}
+h3{font-size:17px;font-weight:700;margin:26px 0 8px;}
+p{margin:0 0 14px;max-width:68ch;}
+a{color:var(--green);text-underline-offset:3px;}
+.lede{color:var(--ink-soft);}
+.section-head{
+  border-bottom:2px solid var(--line-strong);
+  padding-bottom:10px;margin-bottom:22px;
+}
+
+/* ---------- step cards ---------- */
+.step{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:22px 24px;
+  margin-bottom:18px;
+  display:flex;
+  gap:18px;
+  align-items:flex-start;
+}
+.step .rail{
+  flex:0 0 auto;width:40px;height:40px;border-radius:11px;
+  background:var(--green-wash);color:var(--green);
+  border:1px solid var(--line-strong);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:700;
+  margin-top:2px;
+}
+.step .body{min-width:0;flex:1;}
+.step h2{margin-bottom:4px;}
+.step h2 .num{display:none;}
+.action-tag{
+  display:inline-block;font-family:var(--mono);font-size:12px;
+  background:var(--surface-2);border:1px solid var(--line);
+  color:var(--ink-soft);border-radius:6px;padding:2px 9px;margin-bottom:14px;
+}
+.action-tag b{color:var(--ink);font-weight:600;}
+
+/* ---------- field tables ---------- */
+.tablewrap{overflow-x:auto;margin:0 0 16px;border:1px solid var(--line);border-radius:10px;}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:420px;}
+th,td{text-align:start;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top;}
+thead th{
+  background:var(--surface-2);font-size:12px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+tbody tr:last-child td{border-bottom:none;}
+td code,th code,p code,li code{
+  font-family:var(--mono);font-size:.88em;
+  background:var(--surface-2);border:1px solid var(--line);
+  border-radius:5px;padding:1px 5px;white-space:nowrap;
+}
+.step .tablewrap{background:var(--surface);}
+
+/* ---------- code + copy ---------- */
+.snippet{margin:0 0 16px;border-radius:10px;overflow:hidden;background:var(--code-bg);}
+.snippet header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:7px 10px 7px 14px;
+  border-bottom:1px solid rgba(255,255,255,.09);
+}
+.snippet .label{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(223,233,208,.6);
+}
+.snippet pre{
+  margin:0;padding:14px;overflow-x:auto;
+  font-family:var(--mono);font-size:13.5px;line-height:1.6;
+  color:var(--code-ink);
+}
+button.copy{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
+  background:rgba(255,255,255,.09);color:var(--code-ink);
+  border:1px solid rgba(255,255,255,.16);border-radius:6px;
+  padding:4px 11px;cursor:pointer;flex:0 0 auto;
+  transition:background .15s ease,color .15s ease;
+}
+button.copy:hover{background:rgba(168,216,106,.24);}
+button.copy:focus-visible,input:focus-visible{outline:2px solid var(--green-bright);outline-offset:2px;}
+button.copy.done{background:var(--code-key);color:#16210c;border-color:var(--code-key);}
+
+/* ---------- callouts ---------- */
+.note{
+  border-inline-start:3px solid var(--green-bright);
+  background:var(--green-wash);
+  border-radius:0 8px 8px 0;
+  padding:12px 16px;margin:0 0 16px;
+}
+.note.warn{border-color:var(--orange);background:var(--orange-wash);}
+.note.stop{border-color:var(--danger);background:var(--danger-wash);}
+.note p:last-child{margin-bottom:0;}
+.note .tt{
+  display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:3px;
+}
+
+/* ---------- golden rules ---------- */
+.rules{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+.rule{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:18px 20px;box-shadow:var(--shadow);
+}
+.rule .tag{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--orange);display:block;margin-bottom:6px;
+}
+.rule h3{margin:0 0 6px;font-size:16.5px;}
+.rule p{margin:0;font-size:14.5px;color:var(--ink-soft);}
+
+/* ---------- flow map ---------- */
+.map{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:20px;box-shadow:var(--shadow);
+}
+.map ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;}
+.map li{display:flex;align-items:flex-start;gap:14px;padding:0;}
+.map .dot{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;align-self:stretch;
+}
+.map .dot i{
+  width:11px;height:11px;border-radius:50%;background:var(--green-bright);
+  margin-top:9px;flex:0 0 auto;
+}
+.map .dot span{width:2px;flex:1 1 auto;background:var(--line-strong);min-height:16px;}
+.map li:last-child .dot span{display:none;}
+.map .txt{padding:2px 0 16px;font-size:15px;}
+.map li:last-child .txt{padding-bottom:2px;}
+.map .txt b{font-family:var(--mono);font-size:13.5px;font-weight:600;}
+.map .txt em{font-style:normal;color:var(--ink-faint);font-size:13.5px;}
+
+/* ---------- checklist ---------- */
+.check{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:8px 20px;box-shadow:var(--shadow);
+}
+.check ul{list-style:none;margin:0;padding:0;}
+.check li{border-bottom:1px solid var(--line);}
+.check li:last-child{border-bottom:none;}
+.check label{
+  display:flex;gap:12px;align-items:flex-start;padding:12px 0;cursor:pointer;font-size:15px;
+}
+.check input{
+  appearance:none;-webkit-appearance:none;flex:0 0 auto;
+  width:20px;height:20px;margin:4px 0 0;border-radius:6px;
+  border:1.5px solid var(--line-strong);background:var(--surface);cursor:pointer;
+  transition:background .15s ease,border-color .15s ease;
+}
+.check input:checked{background:var(--green);border-color:var(--green);}
+.check input:checked::after{
+  content:"";display:block;width:5px;height:10px;margin:2px auto 0;
+  border:solid var(--surface);border-width:0 2px 2px 0;transform:rotate(43deg);
+}
+.check input:checked + span{color:var(--ink-faint);text-decoration:line-through;}
+.reset{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
+  background:none;border:1px solid var(--line-strong);color:var(--ink-soft);
+  border-radius:6px;padding:4px 11px;cursor:pointer;margin:12px 0 14px;
+}
+.reset:hover{color:var(--ink);border-color:var(--ink-faint);}
+.reset:focus-visible{outline:2px solid var(--green-bright);outline-offset:2px;}
+
+/* ---------- misc ---------- */
+ul.plain{padding-inline-start:22px;margin:0 0 16px;}
+ul.plain li{margin-bottom:7px;}
+.foot{
+  border-top:1px solid var(--line);padding-top:20px;color:var(--ink-faint);font-size:14px;
+}
+@media (max-width:640px){
+  body{font-size:15.5px;}
+  .step{padding:18px;gap:13px;}
+  .step .rail{width:34px;height:34px;font-size:14px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important;}
+}
+</style>
+
+<div class="masthead">
+  <div class="page">
+    <p class="eyebrow">CM-TRS Job Tracking · Power Automate</p>
+    <h1>สร้าง Flow แจ้งเตือน Job ค้างเข้า Teams ทุกเช้า 08:00</h1>
+    <p>คู่มือสำหรับคนที่ไม่เคยสร้าง Flow มาก่อน — ทำตามทีละขั้น กดปุ่ม <b>คัดลอก</b> แล้ววางได้เลย ไม่ต้องพิมพ์สูตรเอง</p>
+    <ul class="facts">
+      <li>10 ขั้นตอน</li>
+      <li>ใช้เวลา ~40 นาที</li>
+      <li>ไม่ต้องเขียนโค้ด</li>
+      <li>ฟรี ไม่ต้องซื้อ Premium</li>
+    </ul>
+  </div>
+</div>
+
+<div class="page">
+
+<section>
+  <div class="section-head"><h2>Flow นี้ทำอะไร</h2></div>
+  <p class="lede">ทุกเช้า 8 โมง Flow จะเปิดไฟล์ Excel งานซ่อม → คัดเฉพาะงานที่ <b>ยังไม่ปิด</b> → เรียง Critical ก่อน → แล้วส่งเป็นตาราง 8 คอลัมน์เข้า Teams ให้ทีมเห็นพร้อมกันทุกคน ไม่ต้องมีใครมานั่งเปิดไฟล์เอง</p>
+  <div class="map">
+    <ol>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Recurrence</b> — นาฬิกาปลุก 08:00 <em>ขั้นที่ 1</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Compose</b> ×2 — ทำวันที่ภาษาไทยไว้โชว์บนการ์ด <em>ขั้นที่ 2</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>List rows present in a table</b> — ดึงงานทั้งหมดจาก Excel <em>ขั้นที่ 3</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Filter Open Jobs</b> — ทิ้งงานที่ปิดแล้ว <em>ขั้นที่ 4</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Filter Critical / Major / Minor</b> — แยกกอง เอาไว้นับ KPI <em>ขั้นที่ 5</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Compose_Top_Jobs</b> — ต่อ 3 กองแล้วตัดเหลือ 12 แถว <em>ขั้นที่ 6</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Select Job Rows</b> — แปลงข้อมูลเป็นแถวตารางของการ์ด <em>ขั้นที่ 7</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Condition</b> — มีงานค้างไหม <em>ขั้นที่ 8</em></span></li>
+      <li><span class="dot"><i></i><span></span></span><span class="txt"><b>Post adaptive card</b> — ส่งการ์ดเข้า Teams <em>ขั้นที่ 9–10</em></span></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>3 กฎที่มือใหม่พลาดบ่อยที่สุด</h2>
+    <p class="lede" style="margin-bottom:0">อ่านก่อนเริ่ม 1 นาที ประหยัดเวลาไล่หาสาเหตุทีหลังเป็นชั่วโมง</p>
+  </div>
+  <div class="rules">
+    <div class="rule">
+      <span class="tag">กฎข้อ 1</span>
+      <h3>ชื่อ Action ต้องตรงเป๊ะ</h3>
+      <p>สูตรอ้างชื่อ Action ที่คุณตั้งเอง และ <b>เว้นวรรคจะกลายเป็น _</b> ถ้าตั้งชื่อว่า <code>Filter Open Jobs</code> สูตรต้องเขียน <code>body('Filter_Open_Jobs')</code> — ตั้งชื่อผิดตัวเดียว การ์ดจะขึ้นแต่ตารางว่างเปล่า</p>
+    </div>
+    <div class="rule">
+      <span class="tag">กฎข้อ 2</span>
+      <h3>การ์ดห้ามเกิน 28 KB</h3>
+      <p>Teams รับการ์ดได้ใบละ 28 KB เท่านั้น เกินแล้ว Flow ยังขึ้น <b>Succeeded</b> สีเขียวปกติ แต่การ์ดจะไม่โผล่ใน Teams เลย — จึงต้องตัดเหลือ 12 แถวในขั้นที่ 6</p>
+    </div>
+    <div class="rule">
+      <span class="tag">กฎข้อ 3</span>
+      <h3>อย่าใส่ " ครอบ expression</h3>
+      <p>ในไฟล์การ์ดมีบรรทัด <code>"items": @{body('Select_Job_Rows')}</code> ที่ <b>ไม่มีเครื่องหมายคำพูดครอบ</b> — ตั้งใจให้เป็นแบบนั้น ถ้าเผลอใส่ <code>"</code> จะได้ error <code>Invalid JSON</code> ทันที</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>เตรียมของให้พร้อมก่อน</h2>
+    <p class="lede" style="margin-bottom:0">ติ๊กให้ครบทุกข้อก่อนเปิด Power Automate (เครื่องจำการติ๊กไว้ให้)</p>
+  </div>
+  <div class="check">
+    <ul>
+      <li><label><input type="checkbox" data-ck="p1"><span>ไฟล์ <code>JobMonitor_CMTRS_Job_Tracking.xlsx</code> อยู่บน <b>SharePoint หรือ OneDrive for Business</b> (เก็บในเครื่องตัวเองใช้ไม่ได้)</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2"><span>เปิดไฟล์ → เลือก <code>A1:AE118</code> → <code>Insert</code> › <code>Table</code> → ติ๊ก <b>My table has headers</b></span></label></li>
+      <li><label><input type="checkbox" data-ck="p3"><span>ตั้งชื่อตารางว่า <code>JobTracking</code> ที่ <code>Table Design</code> › <code>Table Name</code> แล้วบันทึก</span></label></li>
+      <li><label><input type="checkbox" data-ck="p4"><span>มีไฟล์ JSON 4 ไฟล์อยู่ใกล้มือ: <code>01</code> การ์ดหลัก · <code>02</code> แถวตาราง · <code>06</code> การ์ดตอนไม่มีงาน · (<code>07</code> ถ้าอยากได้เวอร์ชันมือถือ)</span></label></li>
+      <li><label><input type="checkbox" data-ck="p5"><span>รู้แล้วว่าจะส่งเข้า <b>Team ไหน Channel ไหน</b> และตัวเองมีสิทธิ์โพสต์ในนั้น</span></label></li>
+      <li><label><input type="checkbox" data-ck="p6"><span>มี URL ของ Dashboard และ URL ไฟล์ Excel ไว้ใส่ปุ่มบนการ์ด</span></label></li>
+    </ul>
+  </div>
+  <button class="reset" type="button" id="resetAll">ล้างเครื่องหมายถูกทั้งหมด</button>
+  <div class="note warn">
+    <span class="tt">ทำไมต้องทำเป็น Table</span>
+    <p>Power Automate อ่าน Excel ได้เฉพาะข้อมูลที่เป็น <b>Table</b> เท่านั้น ถ้าเป็นแค่ sheet ธรรมดา ตอนเลือกในขั้นที่ 3 ช่อง Table จะว่างเปล่าและไปต่อไม่ได้</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>ลงมือสร้าง Flow</h2>
+    <p class="lede" style="margin-bottom:0">เริ่มที่ <a href="https://make.powerautomate.com">make.powerautomate.com</a> › <b>Create</b> › <b>Scheduled cloud flow</b> — ทุกขั้นให้กด <b>+ New step</b> ต่อกันลงมาเรื่อย ๆ ตามลำดับ</p>
+  </div>
+
+  <div class="step">
+    <div class="rail">1</div>
+    <div class="body">
+      <h2>ตั้งนาฬิกาปลุก 08:00</h2>
+      <div class="action-tag">Trigger · <b>Recurrence</b></div>
+      <p>ขั้นแรกสุดคือบอก Flow ว่าจะให้ทำงานตอนไหน เลือกเวลาเป็น Bangkok ตั้งแต่ตรงนี้ จะได้ไม่ต้องบวก 7 ชั่วโมงเองในทุกสูตรทีหลัง</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>ช่อง</th><th>ใส่ค่า</th></tr></thead>
+        <tbody>
+          <tr><td>Frequency</td><td><code>Day</code></td></tr>
+          <tr><td>Interval</td><td><code>1</code></td></tr>
+          <tr><td>Time zone</td><td>(UTC+07:00) Bangkok, Hanoi, Jakarta</td></tr>
+          <tr><td>At these hours</td><td><code>8</code></td></tr>
+          <tr><td>At these minutes</td><td><code>0</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="note"><p>ช่อง <b>Time zone / At these hours</b> ซ่อนอยู่ใต้ <code>Show advanced options</code></p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">2</div>
+    <div class="body">
+      <h2>ทำวันที่ไว้โชว์บนการ์ด</h2>
+      <div class="action-tag">Action · <b>Compose</b> (สร้าง 2 อัน)</div>
+      <p>สร้าง Compose อันแรก เปลี่ยนชื่อเป็น <code>Compose_ReportDate</code> แล้วในช่อง Inputs กดแท็บ <b>Expression</b> (fx) วางสูตรนี้:</p>
+      <div class="snippet"><header><span class="label">Compose_ReportDate → 15 Aug 2026</span><button class="copy" type="button">คัดลอก</button></header><pre>formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'dd MMM yyyy')</pre></div>
+      <p>สร้างอีกอัน ชื่อ <code>Compose_RunTime</code>:</p>
+      <div class="snippet"><header><span class="label">Compose_RunTime → 15-Aug-26 08:00</span><button class="copy" type="button">คัดลอก</button></header><pre>formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'dd-MMM-yy HH:mm')</pre></div>
+      <div class="note">
+        <span class="tt">วิธีเปลี่ยนชื่อ Action</span>
+        <p>กดจุดสามจุด <b>…</b> มุมขวาบนของกล่อง Action → <b>Rename</b> — ทำทุกกล่องตามชื่อในคู่มือนี้ เพราะสูตรขั้นถัด ๆ ไปเรียกใช้ชื่อพวกนี้</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">3</div>
+    <div class="body">
+      <h2>ดึงข้อมูลออกจาก Excel</h2>
+      <div class="action-tag">Action · <b>List rows present in a table</b> (Excel Online Business)</div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>ช่อง</th><th>ใส่ค่า</th></tr></thead>
+        <tbody>
+          <tr><td>Location / Document Library</td><td>ที่เก็บไฟล์บน SharePoint หรือ OneDrive</td></tr>
+          <tr><td>File</td><td><code>JobMonitor_CMTRS_Job_Tracking.xlsx</code></td></tr>
+          <tr><td>Table</td><td><code>JobTracking</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="note stop">
+        <span class="tt">ห้ามข้ามข้อนี้</span>
+        <p>กด <code>Show advanced options</code> → ตั้ง <b>Top Count = 5000</b> และเปิด <b>Pagination</b> ไม่งั้นจะได้ข้อมูลมาแค่ 256 แถวแรก แล้วงานที่เหลือจะหายไปเงียบ ๆ โดยไม่มี error</p>
+      </div>
+      <p>ถ้าใช้ SharePoint List แทน Excel ให้ใช้ Action <code>Get items</code> และเปลี่ยนชื่อคอลัมน์ในสูตรตามตารางท้ายหน้า</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">4</div>
+    <div class="body">
+      <h2>คัดเฉพาะงานที่ยังไม่ปิด</h2>
+      <div class="action-tag">Action · <b>Filter array</b> → เปลี่ยนชื่อเป็น <b>Filter Open Jobs</b></div>
+      <p>ช่อง <b>From</b> เลือก <code>value</code> จากขั้นที่ 3 (Dynamic content) จากนั้นกดปุ่ม <b>Edit in advanced mode</b> ใต้ช่องเงื่อนไข แล้ววาง:</p>
+      <div class="snippet"><header><span class="label">Advanced mode</span><button class="copy" type="button">คัดลอก</button></header><pre>@not(contains(createArray('Closed','Completed','Cancelled','Resolved'), string(item()?['Status'])))</pre></div>
+      <p>แปลเป็นภาษาคน: เก็บทุกแถวที่ Status <b>ไม่ใช่</b> Closed / Completed / Cancelled / Resolved</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">5</div>
+    <div class="body">
+      <h2>แยกกองตามความรุนแรง</h2>
+      <div class="action-tag">Action · <b>Filter array</b> ×3</div>
+      <p>สร้าง Filter array อีก 3 อัน ทั้งหมด <b>From</b> = <code>body('Filter_Open_Jobs')</code> เหมือนกัน ต่างกันแค่เงื่อนไขใน advanced mode</p>
+      <div class="snippet"><header><span class="label">Filter Critical</span><button class="copy" type="button">คัดลอก</button></header><pre>@equals(item()?['Priority'], 'Critical')</pre></div>
+      <div class="snippet"><header><span class="label">Filter Major</span><button class="copy" type="button">คัดลอก</button></header><pre>@equals(item()?['Priority'], 'Major')</pre></div>
+      <div class="snippet"><header><span class="label">Filter Minor</span><button class="copy" type="button">คัดลอก</button></header><pre>@not(contains(createArray('Critical','Major'), string(item()?['Priority'])))</pre></div>
+      <div class="note">
+        <p>ทำไม Minor ไม่ใช้ <code>equals(...,'Minor')</code>? เพราะเขียนแบบ <b>ไม่ใช่ Critical และไม่ใช่ Major</b> จะกวาดแถวที่ช่อง Priority ว่างหรือเป็น null เข้ามาด้วย (ในไฟล์ตัวอย่างมีอยู่ 1 แถว) ไม่งั้นงานนั้นจะหายไปจากรายงาน</p>
+      </div>
+      <p>ทั้ง 3 กองนี้เอาไว้นับตัวเลข KPI บนหัวการ์ดด้วย <code>length(body('Filter_Critical'))</code> และเพื่อนอีกสองตัว</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">6</div>
+    <div class="body">
+      <h2>เรียงลำดับ แล้วตัดเหลือ 12 แถว</h2>
+      <div class="action-tag">Action · <b>Compose</b> → ชื่อ <b>Compose_Top_Jobs</b></div>
+      <p>Power Automate ไม่มีปุ่ม Sort ให้ใช้ เลยใช้วิธี <b>ต่อกองตามลำดับที่อยากได้</b> แทน: Critical มาก่อน ตามด้วย Major แล้วค่อย Minor จากนั้น <code>take()</code> เอาแค่ 12 แถวแรก</p>
+      <div class="snippet"><header><span class="label">Inputs (แท็บ Expression)</span><button class="copy" type="button">คัดลอก</button></header><pre>take(union(body('Filter_Critical'), body('Filter_Major'), body('Filter_Minor')), 12)</pre></div>
+      <div class="note warn">
+        <span class="tt">ทำไมต้อง 12</span>
+        <p>วัดจากการ์ดชุดนี้จริง ๆ: โครงการ์ดเปล่า 4.7 KB + แถวละ ~1.24 KB</p>
+        <div class="tablewrap" style="margin-top:10px"><table>
+          <thead><tr><th>จำนวนแถว</th><th>ขนาดการ์ด</th><th>ผล</th></tr></thead>
+          <tbody>
+            <tr><td>10</td><td>17.1 KB</td><td>ปลอดภัย</td></tr>
+            <tr><td><b>12</b></td><td><b>19.5 KB</b></td><td>แนะนำ</td></tr>
+            <tr><td>15</td><td>23.2 KB</td><td>ยังไหว</td></tr>
+            <tr><td>18</td><td>26.9 KB</td><td>เฉียดลิมิต</td></tr>
+            <tr><td>20</td><td>29.4 KB</td><td>การ์ดหาย</td></tr>
+          </tbody>
+        </table></div>
+        <p style="margin-top:10px">ชื่อ Site Name หรือชื่อคนภาษาไทยยาว ๆ ทำให้แต่ละแถวโตกว่านี้ได้ จึงเผื่อไว้ที่ 12 · ไฟล์ตัวอย่างมี 117 งาน ที่เหลือให้กดปุ่มไปดูใน Dashboard เอา</p>
+      </div>
+      <p>อยากโชว์บรรทัด "ยังมีอีก N รายการ" บนการ์ด ใช้สูตรนี้:</p>
+      <div class="snippet"><header><span class="label">จำนวนที่ไม่ได้แสดง</span><button class="copy" type="button">คัดลอก</button></header><pre>sub(length(body('Filter_Open_Jobs')), length(outputs('Compose_Top_Jobs')))</pre></div>
+      <div class="note"><p><code>union()</code> จะตัดแถวที่ข้อมูลซ้ำกันทุกช่องออก — Job ID ไม่ซ้ำอยู่แล้วจึงปลอดภัย ถ้าไม่อยากให้ตัดเลยเปลี่ยนเป็น <code>concat()</code> แทน <code>union()</code></p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">7</div>
+    <div class="body">
+      <h2>แปลงข้อมูลเป็นแถวของตาราง</h2>
+      <div class="action-tag">Action · <b>Select</b> → ชื่อ <b>Select Job Rows</b></div>
+      <ul class="plain">
+        <li><b>From:</b> ใส่ expression <code>outputs('Compose_Top_Jobs')</code></li>
+        <li><b>Map:</b> มองหาปุ่มสลับ <b>⇄</b> มุมขวาบนของช่อง Map กดเพื่อเปลี่ยนเป็น <b>code view</b> (จากช่อง key–value กลายเป็นกล่องข้อความยาว) แล้ววางเนื้อหาไฟล์ <code>02-row-template.json</code> ทั้งไฟล์</li>
+      </ul>
+      <p>ผลลัพธ์ที่ได้คือรายการ <code>ColumnSet</code> 12 ก้อน พร้อมยัดลงกลางการ์ดในขั้นถัดไป</p>
+      <div class="note"><p>อยากได้เวอร์ชันอ่านง่ายบนมือถือ ใช้ <code>07-row-template-mobile.json</code> แทน (กินพื้นที่แค่ ~0.74 KB/แถว ดันได้ถึง ~28 แถว) แล้วลบ Container หัวตารางออกจากไฟล์ <code>01</code> ด้วย</p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">8</div>
+    <div class="body">
+      <h2>กันการ์ดเปล่า</h2>
+      <div class="action-tag">Action · <b>Condition</b></div>
+      <p>วันไหนไม่มีงานค้างเลย เราไม่อยากส่งตารางว่าง ๆ เข้า Teams ให้ตั้งเงื่อนไขดังนี้</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>ช่องซ้าย</th><th>เงื่อนไข</th><th>ช่องขวา</th></tr></thead>
+        <tbody><tr><td><code>length(body('Filter_Open_Jobs'))</code><br><span style="font-size:13px;color:var(--ink-soft)">(ใส่ผ่านแท็บ Expression)</span></td><td>is greater than</td><td><code>0</code></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">9</div>
+    <div class="body">
+      <h2>สาขา If yes — ส่งการ์ดจริง</h2>
+      <div class="action-tag">Action · <b>Post adaptive card in a chat or channel</b> (Microsoft Teams)</div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>ช่อง</th><th>ใส่ค่า</th></tr></thead>
+        <tbody>
+          <tr><td>Post as</td><td>Flow bot</td></tr>
+          <tr><td>Post in</td><td>Channel</td></tr>
+          <tr><td>Team / Channel</td><td>ทีมและช่องที่ต้องการแจ้งเตือน</td></tr>
+          <tr><td>Adaptive Card</td><td>วางเนื้อหาไฟล์ <code>01-adaptive-card-power-automate.json</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>ก่อนวาง แก้ URL 2 จุดท้ายไฟล์ให้เป็นลิงก์จริงของคุณ:</p>
+      <div class="snippet"><header><span class="label">ท้ายไฟล์ 01</span><button class="copy" type="button">คัดลอก</button></header><pre>"actions": [
+  { "type": "Action.OpenUrl", "title": "📊 เปิด Dashboard", "url": "&lt;URL Dashboard ของคุณ&gt;" },
+  { "type": "Action.OpenUrl", "title": "📁 เปิดไฟล์ต้นทาง", "url": "&lt;URL ไฟล์ Excel&gt;" }
+]</pre></div>
+      <div class="note stop">
+        <span class="tt">อย่าเอาไฟล์ 01 ไปวางใน Adaptive Cards Designer</span>
+        <p>ไฟล์ <code>01</code> และ <code>06</code> ตั้งใจเขียนให้ <b>ไม่ใช่ JSON มาตรฐาน</b> เพราะมีบรรทัด <code>"items": @{body('Select_Job_Rows')}</code> ที่ไม่มีคำพูดครอบ Designer จะฟ้อง error ทันที — ถ้าอยากแก้ดีไซน์ให้ใช้ <code>03-adaptive-card-templating.json</code> คู่กับ <code>04-sample-data.json</code> แทน</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="rail">10</div>
+    <div class="body">
+      <h2>สาขา If no — บอกว่าวันนี้เคลียร์หมด</h2>
+      <div class="action-tag">Action · <b>Post adaptive card in a chat or channel</b></div>
+      <p>ตั้งค่าเหมือนขั้นที่ 9 ทุกอย่าง เปลี่ยนแค่ช่อง Adaptive Card เป็นเนื้อหาไฟล์ <code>06-adaptive-card-empty-state.json</code> ซึ่งเป็นการ์ดสั้น ๆ แจ้งว่าไม่มีงานค้าง</p>
+      <p>เสร็จแล้วกด <b>Save</b> มุมขวาบน → กด <b>Test</b> › <b>Manually</b> เพื่อลองยิงดูทันทีโดยไม่ต้องรอ 8 โมง</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head"><h2>ตรวจก่อนเปิดใช้จริง</h2></div>
+  <div class="check">
+    <ul>
+      <li><label><input type="checkbox" data-ck="v1"><span>กด <b>Test › Manually</b> แล้วทุกกล่องขึ้นเครื่องหมายถูกสีเขียว</span></label></li>
+      <li><label><input type="checkbox" data-ck="v2"><span>การ์ดโผล่ใน Teams <b>จริง ๆ</b> (Flow เขียวไม่ได้แปลว่าการ์ดไปถึง)</span></label></li>
+      <li><label><input type="checkbox" data-ck="v3"><span>ตารางในการ์ดมีข้อมูลครบ 8 คอลัมน์ ไม่มีช่องว่างแปลก ๆ</span></label></li>
+      <li><label><input type="checkbox" data-ck="v4"><span>ตัวเลข Critical / Major / Minor บนหัวการ์ดตรงกับที่นับในไฟล์ Excel</span></label></li>
+      <li><label><input type="checkbox" data-ck="v5"><span>กดปุ่ม Dashboard และปุ่มไฟล์ต้นทางบนการ์ดแล้วเปิดได้จริง</span></label></li>
+      <li><label><input type="checkbox" data-ck="v6"><span>ภาษาไทยแสดงผลถูกต้อง ไม่กลายเป็น <code>???</code></span></label></li>
+      <li><label><input type="checkbox" data-ck="v7"><span>เปิดสวิตช์ Flow เป็น <b>On</b> แล้ว</span></label></li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>เจอปัญหา แก้ตรงนี้</h2>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>อาการ</th><th>สาเหตุและวิธีแก้</th></tr></thead>
+    <tbody>
+      <tr><td>Flow ขึ้นเขียว แต่การ์ดไม่โผล่ใน Teams</td><td>การ์ดเกิน 28 KB → ลดเลข <code>12</code> ใน <code>Compose_Top_Jobs</code> ลง</td></tr>
+      <tr><td>การ์ดขึ้นแต่ตารางว่างเปล่า</td><td>ชื่อ Action ในสูตรไม่ตรงกับชื่อจริง — เว้นวรรคต้องเป็น <code>_</code></td></tr>
+      <tr><td>ได้ข้อมูลมาแค่ 256 แถว</td><td>ยังไม่ได้เปิด Pagination + Top Count ในขั้นที่ 3</td></tr>
+      <tr><td>Create Time ออกมาเป็นตัวเลข เช่น <code>46249.26</code></td><td>Excel ส่ง serial date มา ใช้สูตรแปลงด้านล่าง</td></tr>
+      <tr><td><code>BadRequest: Invalid JSON</code></td><td>เผลอใส่ <code>"</code> ครอบ <code>@{body('Select_Job_Rows')}</code> — ต้องไม่มี</td></tr>
+      <tr><td>ภาษาไทยกลายเป็น <code>???</code></td><td>ไฟล์ JSON ต้องบันทึกเป็น UTF-8 แบบไม่มี BOM</td></tr>
+      <tr><td>คอลัมน์ Assign to ว่าง (เฉพาะ SharePoint)</td><td>เป็นฟิลด์ Person ต้องใช้ <code>item()?['Assign_x0020_to']?['DisplayName']</code></td></tr>
+    </tbody>
+  </table></div>
+  <h3>สูตรแปลง Excel serial date</h3>
+  <div class="snippet"><header><span class="label">ใช้เมื่อ Create Time เป็นตัวเลข</span><button class="copy" type="button">คัดลอก</button></header><pre>formatDateTime(addSeconds('1899-12-30', int(mul(float(item()?['Create Time']), 86400))), 'dd-MMM-yy HH:mm')</pre></div>
+  <p>ในไฟล์ <code>JobMonitor_CMTRS_Job_Tracking.xlsx</code> คอลัมน์นี้เป็นข้อความอยู่แล้ว (<code>15-Aug-26 06:17</code>) จึงใช้ <code>item()?['Create Time']</code> ตรง ๆ ได้เลย เก็บสูตรนี้ไว้เผื่อวันหน้า</p>
+</section>
+
+<section>
+  <div class="section-head"><h2>ถ้าย้ายไปใช้ SharePoint List</h2></div>
+  <p class="lede">ขั้นตอนเหมือนเดิมทุกอย่าง เปลี่ยนแค่ขั้นที่ 3 เป็น <code>Get items</code> และเปลี่ยนชื่อคอลัมน์ในสูตร เพราะ SharePoint แปลงเว้นวรรคเป็น <code>_x0020_</code></p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>หัวตาราง</th><th>Excel</th><th>SharePoint</th></tr></thead>
+    <tbody>
+      <tr><td>Sub System</td><td><code>item()?['Sub System']</code></td><td><code>item()?['Sub_x0020_System']</code></td></tr>
+      <tr><td>Job ID</td><td><code>item()?['Job ID']</code></td><td><code>item()?['Job_x0020_ID']</code></td></tr>
+      <tr><td>Priority</td><td><code>item()?['Priority']</code></td><td><code>item()?['Priority']?['Value']</code> ถ้าเป็น Choice</td></tr>
+      <tr><td>Create Time</td><td><code>item()?['Create Time']</code></td><td><code>item()?['Create_x0020_Time']</code></td></tr>
+      <tr><td>Status</td><td><code>item()?['Status']</code></td><td><code>item()?['Status']</code></td></tr>
+      <tr><td>Province Name</td><td><code>item()?['Province Name']</code></td><td><code>item()?['Province_x0020_Name']</code></td></tr>
+      <tr><td>Site Name</td><td><code>item()?['Site Name']</code></td><td><code>item()?['Site_x0020_Name']</code></td></tr>
+      <tr><td>Assign to</td><td><code>item()?['Assign to']</code></td><td><code>item()?['Assign_x0020_to']?['DisplayName']</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>หาชื่อจริงของคอลัมน์ได้ที่ <b>List settings</b> → คลิกชื่อคอลัมน์ → ดูท้าย URL ตรง <code>&amp;Field=</code></p>
+</section>
+
+<section>
+  <div class="section-head"><h2>อยากต่อยอด</h2></div>
+  <ul class="plain">
+    <li><b>ทดสอบก่อนส่งจริง</b> — รัน <code>npx serve .</code> แล้วเปิด <code>preview.html</code> จะเรนเดอร์การ์ดจริงในเบราว์เซอร์ โหลดไฟล์ <code>.xlsx</code> ของคุณมาทดสอบ และคำนวณขนาดการ์ดเทียบลิมิต 28 KB ให้ดูก่อน</li>
+    <li><b>แยกการ์ดตามผู้รับผิดชอบ</b> — เพิ่ม <code>Apply to each</code> วนตามรายชื่อใน Assign to แล้วส่งด้วย <code>Post message in a chat</code> ตรงถึงแต่ละคน</li>
+    <li><b>เพิ่มปุ่มกดรับงาน</b> — ใส่ <code>Action.Execute</code> ใน actions แล้วส่งด้วย <code>Post adaptive card and wait for a response</code> พร้อมสร้าง Flow อีกตัวรับด้วย trigger <code>When someone responds to an adaptive card</code></li>
+    <li><b>เพิ่มบรรทัดสรุปตาม Status</b> — สร้าง Filter array แยกทีละ Status (Interupted, Assigned, On-Site) แล้ว <code>length()</code> ทีละตัว อ่านง่ายและนิ่งกว่าการเขียนสูตรรวมยาว ๆ</li>
+  </ul>
+</section>
+
+<p class="foot">อ้างอิงจาก <code>README.md</code> และ <code>05-flow-expressions.md</code> ของชุดการ์ด CM-TRS Job Tracking · ปรับปรุงล่าสุด 15 ส.ค. 2026</p>
+
+</div>
+
+<script>
+document.querySelectorAll("button.copy").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    var code = btn.closest(".snippet").querySelector("pre").innerText;
+    var done = function(){
+      btn.textContent = "คัดลอกแล้ว";
+      btn.classList.add("done");
+      setTimeout(function(){ btn.textContent = "คัดลอก"; btn.classList.remove("done"); }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done, fallback);
+    } else { fallback(); }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = code; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch(e) { btn.textContent = "กดค้างเพื่อคัดลอก"; }
+      document.body.removeChild(ta);
+    }
+  });
+});
+
+var KEY = "pa-flow-guide-checks";
+var store = {
+  read: function(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } },
+  write: function(v){ try { localStorage.setItem(KEY, JSON.stringify(v)); } catch(e){} }
+};
+var saved = store.read();
+document.querySelectorAll("input[data-ck]").forEach(function(box){
+  if (saved[box.dataset.ck]) box.checked = true;
+  box.addEventListener("change", function(){
+    var s = store.read();
+    if (box.checked) { s[box.dataset.ck] = 1; } else { delete s[box.dataset.ck]; }
+    store.write(s);
+  });
+});
+document.getElementById("resetAll").addEventListener("click", function(){
+  document.querySelectorAll("input[data-ck]").forEach(function(b){ b.checked = false; });
+  store.write({});
+});
+</script>
