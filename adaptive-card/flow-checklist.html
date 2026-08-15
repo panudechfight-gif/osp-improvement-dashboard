@@ -1,0 +1,1411 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CM-TRS Flow Runbook</title>
+<style>
+/* ============ TOKENS : light is the bare :root ============ */
+:root{
+  --ground:#EEF3F5;
+  --surface:#FFFFFF;
+  --surface-2:#F6F9FA;
+  --ink:#0F1A20;
+  --ink-2:#33474F;
+  --muted:#61757F;
+  --line:#D3DEE3;
+  --line-2:#E4ECEF;
+  --accent:#0B6E75;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#DCEEEE;
+  --crit:#B3261E;
+  --warn:#9A5B00;
+  --good:#1A6B45;
+  --crit-soft:#FBE9E7;
+  --warn-soft:#FBF0DC;
+  --good-soft:#E1F1E8;
+  --code-bg:#0F1A20;
+  --code-ink:#D6E5EA;
+  --code-key:#7FD1C8;
+  --code-str:#E3B778;
+  --code-label:#8FA9B0;
+  --code-btn:#CFE2E7;
+  --code-ok-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(15,26,32,.06),0 8px 24px -12px rgba(15,26,32,.18);
+  --font-sans:system-ui,-apple-system,"Segoe UI","Noto Sans Thai UI","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  --font-mono:ui-monospace,"JetBrains Mono","Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0B1216;
+    --surface:#121D23;
+    --surface-2:#16242B;
+    --ink:#E5EEF2;
+    --ink-2:#B6C8D0;
+    --muted:#8299A4;
+    --line:#243740;
+    --line-2:#1C2C34;
+    --accent:#45C4B8;
+    --accent-ink:#06231F;
+    --accent-soft:#12312F;
+    --crit:#F0857B;
+    --warn:#E0A75B;
+    --good:#6FCB9B;
+    --crit-soft:#2C1614;
+    --warn-soft:#2A2013;
+    --good-soft:#132A20;
+    --code-bg:#07100F;
+    --code-ink:#C9DDE2;
+    --code-key:#69C6BC;
+    --code-str:#D5A96C;
+    --code-label:#8FA9B0;
+  --code-btn:#CFE2E7;
+  --code-ok-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B1216;
+  --surface:#121D23;
+  --surface-2:#16242B;
+  --ink:#E5EEF2;
+  --ink-2:#B6C8D0;
+  --muted:#8299A4;
+  --line:#243740;
+  --line-2:#1C2C34;
+  --accent:#45C4B8;
+  --accent-ink:#06231F;
+  --accent-soft:#12312F;
+  --crit:#F0857B;
+  --warn:#E0A75B;
+  --good:#6FCB9B;
+  --crit-soft:#2C1614;
+  --warn-soft:#2A2013;
+  --good-soft:#132A20;
+  --code-bg:#07100F;
+  --code-ink:#C9DDE2;
+  --code-key:#69C6BC;
+  --code-str:#D5A96C;
+  --code-label:#8FA9B0;
+  --code-btn:#CFE2E7;
+  --code-ok-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:16px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{text-wrap:balance;margin:0;line-height:1.25}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+
+/* ============ PROGRESS BAR (sticky) ============ */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--surface) 88%,transparent);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-in{
+  max-width:1040px;margin:0 auto;padding:10px 20px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.tb-label{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap;
+}
+.tb-count{
+  font-family:var(--font-mono);font-size:14px;font-weight:700;
+  color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.bar{
+  flex:1 1 180px;height:8px;min-width:120px;
+  background:var(--line-2);border:1px solid var(--line);border-radius:99px;overflow:hidden;
+}
+.bar-fill{
+  height:100%;width:0%;background:var(--accent);
+  border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);
+}
+.tb-actions{display:flex;gap:8px;margin-left:auto}
+.btn{
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;
+  padding:6px 11px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.btn:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* ============ SHELL ============ */
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px 96px}
+
+/* ============ HERO ============ */
+.hero{padding:52px 0 32px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:14px;
+}
+.hero h1{font-size:clamp(30px,5vw,44px);letter-spacing:-.02em;font-weight:700}
+.hero .lede{margin-top:14px;max-width:62ch;color:var(--ink-2);font-size:17px}
+.facts{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;
+}
+.fact{
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:9px 13px;display:flex;flex-direction:column;gap:1px;box-shadow:var(--shadow);
+}
+.fact b{font-family:var(--font-mono);font-size:17px;font-variant-numeric:tabular-nums;line-height:1.2}
+.fact span{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* ============ CALLOUT ============ */
+.callout{
+  margin-top:28px;border-radius:10px;padding:18px 20px;
+  border:1px solid var(--line);background:var(--surface);
+  border-left:4px solid var(--muted);
+}
+.callout.is-crit{background:var(--crit-soft);border-left-color:var(--crit);border-color:var(--line)}
+.callout.is-warn{background:var(--warn-soft);border-left-color:var(--warn);border-color:var(--line)}
+.callout.is-good{background:var(--good-soft);border-left-color:var(--good);border-color:var(--line)}
+.callout h4{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.callout.is-crit h4{color:var(--crit)}
+.callout.is-warn h4{color:var(--warn)}
+.callout.is-good h4{color:var(--good)}
+.callout p{color:var(--ink-2);font-size:14.5px}
+.callout p + p{margin-top:8px}
+
+/* ============ PHASE ============ */
+.phase{margin-top:56px}
+.phase-head{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  padding-bottom:14px;border-bottom:2px solid var(--ink);
+}
+.phase-tag{
+  font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.1em;
+  background:var(--ink);color:var(--ground);padding:3px 9px;border-radius:4px;
+}
+.phase-head h2{font-size:23px;letter-spacing:-.01em}
+.phase-head .sub{color:var(--muted);font-size:13.5px;margin-left:auto;font-family:var(--font-mono)}
+
+/* ============ STEP RAIL ============ */
+.steps{position:relative;padding-left:64px;padding-top:8px}
+.steps::before{
+  content:"";position:absolute;left:23px;top:34px;bottom:24px;
+  width:2px;background:var(--line);
+}
+.step{position:relative;padding:24px 0}
+.step + .step{border-top:1px solid var(--line-2)}
+.node{
+  position:absolute;left:-64px;top:26px;
+  width:48px;height:48px;border-radius:50%;
+  display:grid;place-items:center;
+  font-family:var(--font-mono);font-size:13px;font-weight:700;letter-spacing:.02em;
+  background:var(--surface);color:var(--muted);
+  border:2px solid var(--line);
+  transition:background .2s,color .2s,border-color .2s;
+}
+.step.done .node{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.step.done .node::after{content:"✓";font-size:19px}
+.step.done .node span{display:none}
+.step.done .step-title{color:var(--muted)}
+.step.done{opacity:.62}
+.step.done:hover{opacity:1}
+
+.step-title{font-size:19px;letter-spacing:-.01em;transition:color .2s}
+.step-kicker{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:5px;
+}
+.step-desc{margin-top:9px;color:var(--ink-2);font-size:15px;max-width:66ch}
+.step-desc + .step-desc{margin-top:7px}
+
+/* ============ FIELD TABLE ============ */
+.tablewrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:400px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line-2);vertical-align:top}
+tr:last-child th,tr:last-child td{border-bottom:0}
+thead th{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);background:var(--surface-2);font-weight:600;
+}
+tbody th{font-weight:600;color:var(--ink-2);white-space:nowrap;width:1%}
+td code,th code{font-family:var(--font-mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line-2);padding:1px 5px;border-radius:4px}
+
+/* ============ CODE BLOCK ============ */
+.code{
+  position:relative;margin-top:14px;
+  background:var(--code-bg);border:1px solid var(--line);border-radius:8px;overflow:hidden;
+}
+.code-head{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 10px 7px 13px;border-bottom:1px solid rgba(255,255,255,.08);
+}
+.code-name{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--code-label);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.copy{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;
+  padding:4px 10px;border-radius:5px;cursor:pointer;flex:none;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:var(--code-btn);
+  transition:background .15s,color .15s;
+}
+.copy:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.copy.ok{background:var(--good);border-color:var(--good);color:var(--code-ok-ink)}
+.code pre{
+  margin:0;padding:13px;overflow-x:auto;
+  font-family:var(--font-mono);font-size:12.5px;line-height:1.6;color:var(--code-ink);
+  tab-size:2;
+}
+.code.is-tall pre{max-height:340px;overflow-y:auto}
+
+/* ============ CHECKS ============ */
+.checks{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.checks li{margin:0}
+.checks label{
+  display:flex;gap:11px;align-items:flex-start;cursor:pointer;
+  padding:7px 11px;border-radius:7px;font-size:14.5px;color:var(--ink-2);
+  border:1px solid transparent;transition:background .15s,border-color .15s;
+}
+.checks label:hover{background:var(--surface);border-color:var(--line-2)}
+.checks input{
+  appearance:none;flex:none;width:19px;height:19px;margin:2px 0 0;
+  border:2px solid var(--line);border-radius:5px;background:var(--surface);
+  cursor:pointer;display:grid;place-items:center;transition:background .15s,border-color .15s;
+}
+.checks input:checked{background:var(--accent);border-color:var(--accent)}
+.checks input:checked::after{content:"✓";color:var(--accent-ink);font-size:13px;line-height:1;font-weight:700}
+.checks input:checked + span{text-decoration:line-through;color:var(--muted)}
+.checks code{font-family:var(--font-mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+
+/* filter mode */
+body.hide-done .step.done{display:none}
+body.hide-done .checks li.ticked{display:none}
+
+/* ============ CHIPS ============ */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.chip{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.07em;
+  padding:3px 8px;border-radius:99px;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--muted);
+}
+.chip.star{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+
+/* ============ APPENDIX ============ */
+.appendix{margin-top:64px;padding-top:32px;border-top:2px solid var(--ink)}
+.appendix h2{font-size:23px;margin-bottom:6px}
+.appendix h3{font-size:16px;margin-top:34px;margin-bottom:10px;font-family:var(--font-mono);letter-spacing:.02em}
+details{
+  border:1px solid var(--line);border-radius:8px;background:var(--surface);
+  margin-top:8px;overflow:hidden;
+}
+summary{
+  cursor:pointer;padding:11px 14px;font-size:14.5px;font-weight:600;color:var(--ink-2);
+  list-style:none;display:flex;gap:10px;align-items:center;
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸";color:var(--accent);font-size:13px;transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+summary:hover{background:var(--surface-2)}
+.details-body{padding:0 14px 14px;font-size:14.5px;color:var(--ink-2)}
+.details-body code{font-family:var(--font-mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line-2);padding:1px 5px;border-radius:4px}
+
+/* diagram */
+.flowmap{
+  margin-top:14px;padding:16px;border-radius:8px;overflow-x:auto;
+  background:var(--code-bg);border:1px solid var(--line);
+}
+.flowmap pre{
+  margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;color:var(--code-ink);
+}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
+  background:var(--ink);color:var(--ground);
+  font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;
+  padding:9px 16px;border-radius:99px;z-index:99;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.foot{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+@media (max-width:640px){
+  .topbar-in{gap:9px;padding:9px 16px}
+  .tb-label{display:none}
+  .bar{order:3;flex:1 0 100%;min-width:0}
+  .tb-actions{margin-left:auto}
+  .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .fact{min-width:0}
+  .steps{padding-left:0}
+  .steps::before{display:none}
+  .node{position:static;width:auto;height:auto;border-radius:5px;padding:3px 9px;display:inline-block;margin-bottom:8px;border-width:1px}
+  .step.done .node::after{content:" ✓"}
+  .step.done .node span{display:inline}
+  .hero{padding-top:34px}
+}
+</style>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <span class="tb-label">Progress</span>
+    <span class="tb-count"><span id="pDone">0</span>/<span id="pTotal">0</span> · <span id="pPct">0</span>%</span>
+    <div class="bar"><div class="bar-fill" id="pBar"></div></div>
+    <div class="tb-actions">
+      <button class="btn" id="btnFilter" aria-pressed="false">ซ่อนที่ทำแล้ว</button>
+      <button class="btn" id="btnReset">เริ่มใหม่</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Power Automate · Adaptive Card · Microsoft Teams</p>
+    <h1>คู่มือสร้าง Flow ส่งการ์ด CM-TRS เข้า Teams</h1>
+    <p class="lede">
+      เช็กลิสต์ลงมือทำจริง ตั้งแต่เตรียมไฟล์ Excel จนถึงเปิด Flow ใช้งาน
+      ติ๊กไปทีละข้อขณะเปิด Power Automate อีกจอ — ความคืบหน้าถูกบันทึกไว้ในเครื่องอัตโนมัติ
+      ปิดหน้านี้แล้วเปิดใหม่ก็ยังอยู่ที่เดิม
+    </p>
+    <div class="facts">
+      <div class="fact"><b>21</b><span>ขั้นตอน</span></div>
+      <div class="fact"><b>3</b><span>เฟส</span></div>
+      <div class="fact"><b>8</b><span>คอลัมน์บนการ์ด</span></div>
+      <div class="fact"><b>~40</b><span>นาที</span></div>
+    </div>
+
+    <div class="callout is-crit">
+      <h4>อ่านก่อน — จุดที่มือใหม่พลาดบ่อยที่สุด</h4>
+      <p><b>Power Automate ไม่มี Adaptive Card Templating Engine</b></p>
+      <p>
+        ถ้าเอาการ์ดที่ใช้ syntax <code>${jobs}</code> หรือ <code>$data</code> ไปวางใน action ของ Teams ตรง ๆ
+        การ์ดจะแสดงตัวอักษรดิบ ๆ ออกมาโดยไม่มีข้อมูล
+        วิธีที่ถูกคือ <b>ให้ Flow สร้าง JSON ของแถวตารางเอง</b> ด้วย action <code>Select</code>
+        แล้วยัดกลับเข้าไปในการ์ด — ซึ่งคือสิ่งที่ขั้น B9 และ B10 ทำ
+      </p>
+    </div>
+  </header>
+
+  <!-- ================= PHASE A ================= -->
+  <section class="phase">
+    <div class="phase-head">
+      <span class="phase-tag">PHASE A</span>
+      <h2>เตรียมพร้อมก่อนแตะ Power Automate</h2>
+      <span class="sub">A1–A5</span>
+    </div>
+    <div class="steps">
+
+      <article class="step">
+        <div class="node"><span>A1</span></div>
+        <p class="step-kicker">Microsoft Excel</p>
+        <h3 class="step-title">จัดข้อมูลให้เป็น Table และตั้งชื่อ</h3>
+        <p class="step-desc">
+          Power Automate อ่านข้อมูลจาก Excel ได้เฉพาะที่อยู่ในรูปแบบ Table เท่านั้น
+          ถ้าเป็นแค่ช่วงเซลล์ธรรมดา connector จะมองไม่เห็นและช่อง Table จะว่างเปล่า
+        </p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="a1a"><span>เปิดไฟล์ <code>JobMonitor_CMTRS_Job_Tracking.xlsx</code></span></label></li>
+          <li><label><input type="checkbox" data-k="a1b"><span>คลุมข้อมูลทั้งหมดรวมแถวหัวตาราง แล้วกด <code>Ctrl + T</code></span></label></li>
+          <li><label><input type="checkbox" data-k="a1c"><span>ติ๊ก <b>My table has headers</b> แล้วกด OK</span></label></li>
+          <li><label><input type="checkbox" data-k="a1d"><span>แท็บ <b>Table Design</b> → ตั้งชื่อ Table เป็น <code>JobTable</code></span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>A2</span></div>
+        <p class="step-kicker">Microsoft Excel</p>
+        <h3 class="step-title">ตรวจชนิดข้อมูลของคอลัมน์ Create Time</h3>
+        <p class="step-desc">
+          ถ้าเซลล์เป็นชนิด Date ตัว connector จะคืนค่าเป็นตัวเลข serial เช่น <code>46265.69</code> ซึ่งอ่านไม่รู้เรื่องบนการ์ด
+          ไฟล์ตัวอย่างเก็บเป็นข้อความอยู่แล้ว (<code>15-Aug-26 16:43</code>) จึงข้ามข้อนี้ได้
+        </p>
+        <div class="code">
+          <div class="code-head"><span class="code-name">สูตรคอลัมน์ช่วย — ใช้เมื่อ Create Time เป็นชนิด Date</span><button class="copy">คัดลอก</button></div>
+          <pre>=TEXT([@[Create Time]],"dd-mmm-yy hh:mm")</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="a2a"><span>คลิกเซลล์ Create Time — ถ้าข้อความ <b>ชิดซ้าย</b> แปลว่าเป็นข้อความอยู่แล้ว ผ่าน</span></label></li>
+          <li><label><input type="checkbox" data-k="a2b"><span>ถ้า <b>ชิดขวา</b> (เป็น Date) ให้เพิ่มคอลัมน์ช่วยด้วยสูตรด้านบน แล้วชี้ Flow มาที่คอลัมน์ใหม่แทน</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>A3</span></div>
+        <p class="step-kicker">SharePoint / OneDrive</p>
+        <h3 class="step-title">อัปโหลดไฟล์ขึ้นคลาวด์</h3>
+        <p class="step-desc">
+          ไฟล์ที่อยู่บนเครื่อง Power Automate มองไม่เห็น ต้องอยู่บน SharePoint หรือ OneDrive for Business เท่านั้น
+        </p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="a3a"><span>อัปโหลดไฟล์ขึ้น SharePoint Document Library หรือ OneDrive for Business</span></label></li>
+          <li><label><input type="checkbox" data-k="a3b"><span>เปิดไฟล์ผ่าน browser ได้ปกติ (ยืนยันว่ามีสิทธิ์เข้าถึง)</span></label></li>
+          <li><label><input type="checkbox" data-k="a3c"><span>คัดลอก URL ของไฟล์เก็บไว้ — จะได้ใช้ตอนแก้ปุ่มในขั้น C4</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>A4</span></div>
+        <p class="step-kicker">Microsoft Teams</p>
+        <h3 class="step-title">เตรียมปลายทางที่จะส่งการ์ด</h3>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="a4a"><span>เลือก Team และ Channel ที่จะรับรายงาน เช่น <code>NOC-Daily-Report</code></span></label></li>
+          <li><label><input type="checkbox" data-k="a4b"><span>ยืนยันว่าบัญชีที่จะสร้าง Flow มีสิทธิ์โพสต์ใน Channel นั้น</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>A5</span></div>
+        <p class="step-kicker">Adaptive Cards Designer · ไม่บังคับแต่แนะนำ</p>
+        <h3 class="step-title">พรีวิวหน้าตาการ์ดก่อน</h3>
+        <p class="step-desc">
+          ใช้เวลา 5 นาที ได้เห็นการ์ดพร้อมข้อมูลจริงโดยยังไม่ต้องแตะ Power Automate เลย
+          ถ้าหน้าตาไม่ถูกใจ แก้ตอนนี้ง่ายกว่าแก้ทีหลังมาก
+        </p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="a5a"><span>เปิด <a href="https://adaptivecards.io/designer/" target="_blank" rel="noopener">adaptivecards.io/designer</a></span></label></li>
+          <li><label><input type="checkbox" data-k="a5b"><span>มุมขวาบน ตั้ง Host App เป็น <b>Microsoft Teams</b></span></label></li>
+          <li><label><input type="checkbox" data-k="a5c"><span>วางไฟล์ <code>01-card-template.json</code> ในช่อง Card Payload Editor</span></label></li>
+          <li><label><input type="checkbox" data-k="a5d"><span>วางไฟล์ <code>02-sample-data.json</code> ในช่อง Sample Data Editor ด้านล่าง</span></label></li>
+          <li><label><input type="checkbox" data-k="a5e"><span>กด <b>Preview mode</b> → ต้องเห็นตาราง 8 คอลัมน์ 15 แถว พร้อมสี</span></label></li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= PHASE B ================= -->
+  <section class="phase">
+    <div class="phase-head">
+      <span class="phase-tag">PHASE B</span>
+      <h2>สร้าง Flow ทีละ Action</h2>
+      <span class="sub">B1–B11</span>
+    </div>
+
+    <div class="callout is-warn">
+      <h4>กฎเหล็กของเฟสนี้</h4>
+      <p>
+        ต้อง <b>เปลี่ยนชื่อ action ให้ตรงเป๊ะ</b> ตามที่ระบุในทุกขั้น เพราะ expression ขั้นถัดไปอ้างอิงชื่อพวกนี้
+        เช่น <code>body('Filter_Open')</code> จะพังทันทีถ้า action ชื่อไม่ตรง
+      </p>
+      <p>
+        วิธีเปลี่ยนชื่อ: คลิกจุดสามจุด <code>…</code> มุมขวาบนของ action → <b>Rename</b>
+        (เว้นวรรคจะถูกแปลงเป็น <code>_</code> อัตโนมัติ — พิมพ์ <code>Filter Open</code> ระบบจะอ่านเป็น <code>Filter_Open</code>)
+      </p>
+    </div>
+
+    <div class="steps">
+
+      <article class="step">
+        <div class="node"><span>B1</span></div>
+        <p class="step-kicker">Trigger</p>
+        <h3 class="step-title">สร้าง Scheduled cloud flow</h3>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b1a"><span>เข้า <a href="https://make.powerautomate.com" target="_blank" rel="noopener">make.powerautomate.com</a></span></label></li>
+          <li><label><input type="checkbox" data-k="b1b"><span><b>Create</b> → <b>Scheduled cloud flow</b></span></label></li>
+          <li><label><input type="checkbox" data-k="b1c"><span>ตั้งชื่อ Flow: <code>CM-TRS Daily Job Monitor</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b1d"><span>Repeat every <code>1</code> <code>Day</code> → กด <b>Create</b></span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B2</span></div>
+        <p class="step-kicker">Recurrence</p>
+        <h3 class="step-title">ตั้ง Time zone เป็นเวลาไทย</h3>
+        <p class="step-desc">
+          ถ้าไม่ตั้ง Flow จะยิงตามเวลา UTC ทำให้การ์ดมาถึงตอนตีสาม
+        </p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>ช่อง</th><th>ค่าที่ต้องใส่</th></tr></thead>
+            <tbody>
+              <tr><th>Time zone</th><td>(UTC+07:00) Bangkok, Hanoi, Jakarta</td></tr>
+              <tr><th>At these hours</th><td><code>8</code></td></tr>
+              <tr><th>At these minutes</th><td><code>0</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b2a"><span>คลิก action <b>Recurrence</b> → <b>Show advanced options</b></span></label></li>
+          <li><label><input type="checkbox" data-k="b2b"><span>กรอกทั้ง 3 ช่องตามตารางด้านบน</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B3</span></div>
+        <p class="step-kicker">Excel Online (Business)</p>
+        <h3 class="step-title">ดึงข้อมูลจากตารางใน Excel</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>ช่อง</th><th>ค่าที่ต้องใส่</th></tr></thead>
+            <tbody>
+              <tr><th>Location</th><td>SharePoint Site หรือ OneDrive for Business</td></tr>
+              <tr><th>Document Library</th><td>Documents</td></tr>
+              <tr><th>File</th><td>เลือกไฟล์ <code>JobMonitor_CMTRS_Job_Tracking.xlsx</code></td></tr>
+              <tr><th>Table</th><td><code>JobTable</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="chips"><span class="chip">ชื่อ action: List rows present in a table (ไม่ต้องเปลี่ยน)</span></div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b3a"><span><b>+ New step</b> → ค้นหา <code>Excel Online (Business)</code> → <b>List rows present in a table</b></span></label></li>
+          <li><label><input type="checkbox" data-k="b3b"><span>กรอก 4 ช่องตามตารางด้านบน</span></label></li>
+          <li><label><input type="checkbox" data-k="b3c"><span>คลิก <code>…</code> → <b>Settings</b> → เปิด <b>Pagination = On</b> → Threshold <code>5000</code> → Done</span></label></li>
+        </ul>
+        <div class="callout is-warn" style="margin-top:14px">
+          <h4>ถ้าไม่เปิด Pagination</h4>
+          <p>Flow จะดึงได้แค่ 256 แถวแรกเงียบ ๆ โดยไม่แจ้ง error — งานที่เหลือจะหายไปจากรายงานทั้งหมด</p>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B4</span></div>
+        <p class="step-kicker">Data Operation · Filter array</p>
+        <h3 class="step-title">กรองเอาเฉพาะงานที่ยังไม่ปิด</h3>
+        <div class="chips"><span class="chip">Rename เป็น: Filter Open</span></div>
+        <div class="code">
+          <div class="code-head"><span class="code-name">From — เลือก dynamic content ชื่อ value</span><button class="copy">คัดลอก</button></div>
+          <pre>body('List_rows_present_in_a_table')?['value']</pre>
+        </div>
+        <div class="code">
+          <div class="code-head"><span class="code-name">เงื่อนไข — กด Edit in advanced mode ก่อนวาง</span><button class="copy">คัดลอก</button></div>
+          <pre>@and(not(equals(item()?['Status'],'Closed')),not(equals(item()?['Status'],'Cancelled')))</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b4a"><span><b>+ New step</b> → <code>Data Operation</code> → <b>Filter array</b></span></label></li>
+          <li><label><input type="checkbox" data-k="b4b"><span>Rename เป็น <code>Filter Open</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b4c"><span>ช่อง From เลือก dynamic content <b>value</b></span></label></li>
+          <li><label><input type="checkbox" data-k="b4d"><span>กด <b>Edit in advanced mode</b> แล้ววางเงื่อนไขด้านบน</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B5</span></div>
+        <p class="step-kicker">Data Operation · Filter array ×3</p>
+        <h3 class="step-title">แยกนับตาม Priority</h3>
+        <p class="step-desc">
+          ทำ Filter array เพิ่มอีก 3 อัน ทุกอันตั้ง From เป็น expression <code>body('Filter_Open')</code> เหมือนกันหมด
+          ต่างกันแค่เงื่อนไขและชื่อ
+        </p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Rename เป็น</th><th>เงื่อนไข (advanced mode)</th></tr></thead>
+            <tbody>
+              <tr><th>Filter Critical</th><td><code>@equals(item()?['Priority'],'Critical')</code></td></tr>
+              <tr><th>Filter Major</th><td><code>@equals(item()?['Priority'],'Major')</code></td></tr>
+              <tr><th>Filter Minor</th><td><code>@equals(item()?['Priority'],'Minor')</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code">
+          <div class="code-head"><span class="code-name">From — ใช้ค่าเดียวกันทั้ง 3 action</span><button class="copy">คัดลอก</button></div>
+          <pre>body('Filter_Open')</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b5a"><span>สร้าง <code>Filter Critical</code> ครบทั้ง From และเงื่อนไข</span></label></li>
+          <li><label><input type="checkbox" data-k="b5b"><span>สร้าง <code>Filter Major</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b5c"><span>สร้าง <code>Filter Minor</code> (ไฟล์ตัวอย่างจะได้ 0 ซึ่งถูกต้อง)</span></label></li>
+        </ul>
+        <div class="callout is-good" style="margin-top:14px">
+          <h4>ทางลัดประหยัดเวลา</h4>
+          <p>ทำอันแรกเสร็จ กด <code>…</code> → <b>Copy to my clipboard</b> → <b>+ New step</b> → <b>My clipboard</b> → วาง แล้วแก้แค่เงื่อนไขกับชื่อ</p>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B6</span></div>
+        <p class="step-kicker">Data Operation · Compose</p>
+        <h3 class="step-title">เรียงให้ Critical ขึ้นก่อน Major</h3>
+        <p class="step-desc">
+          Power Automate ไม่มี action สำหรับ Sort เราจึงใช้วิธีต่อ array ตามลำดับที่ต้องการแทน
+          ผลลัพธ์คือ Critical ทั้งหมดมาก่อน แล้วตามด้วย Major และ Minor
+        </p>
+        <div class="chips"><span class="chip">Rename เป็น: Sorted Jobs</span></div>
+        <div class="code">
+          <div class="code-head"><span class="code-name">Inputs</span><button class="copy">คัดลอก</button></div>
+          <pre>union(union(body('Filter_Critical'),body('Filter_Major')),body('Filter_Minor'))</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b6a"><span>เพิ่ม <b>Compose</b> แล้ว Rename เป็น <code>Sorted Jobs</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b6b"><span>วาง expression ด้านบนในช่อง Inputs</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B7</span></div>
+        <p class="step-kicker">Data Operation · Compose</p>
+        <h3 class="step-title">ตัดเอาเฉพาะรายการแรก ๆ</h3>
+        <div class="chips"><span class="chip">Rename เป็น: Top Jobs</span></div>
+        <div class="code">
+          <div class="code-head"><span class="code-name">Inputs — เลข 15 คือจำนวนแถวที่จะโชว์ ปรับได้</span><button class="copy">คัดลอก</button></div>
+          <pre>take(outputs('Sorted_Jobs'),15)</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b7a"><span>เพิ่ม <b>Compose</b> แล้ว Rename เป็น <code>Top Jobs</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b7b"><span>วาง expression ด้านบน</span></label></li>
+        </ul>
+        <div class="callout is-crit" style="margin-top:14px">
+          <h4>อย่าใส่เกิน 20</h4>
+          <p>Teams จำกัดขนาดการ์ดไว้ประมาณ 28 KB ถ้าแถวเยอะเกิน การ์ดจะส่งไม่ออกและ Flow จะ fail</p>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B8</span></div>
+        <p class="step-kicker">Data Operation · Compose</p>
+        <h3 class="step-title">สร้างข้อความสรุปจำนวนแยกตาม Status</h3>
+        <p class="step-desc">
+          ใช้ทริกนับจำนวนโดยไม่ต้องวน loop — แปลง array ทั้งก้อนเป็นข้อความ JSON
+          แล้วนับว่าคำว่า <code>"Status":"Held"</code> โผล่กี่ครั้ง ทำให้ Flow เร็วและประหยัด action มาก
+        </p>
+        <div class="chips"><span class="chip">Rename เป็น: Status Breakdown</span></div>
+        <div class="code">
+          <div class="code-head"><span class="code-name">Inputs — วางทั้งก้อนเป็นบรรทัดเดียว</span><button class="copy">คัดลอก</button></div>
+          <pre>concat('Assigned ',string(sub(length(split(string(body('Filter_Open')),'"Status":"Assigned"')),1)),' · On-Site ',string(sub(length(split(string(body('Filter_Open')),'"Status":"On-Site"')),1)),' · Accepted ',string(sub(length(split(string(body('Filter_Open')),'"Status":"Accepted"')),1)),' · Departed ',string(sub(length(split(string(body('Filter_Open')),'"Status":"Departed"')),1)),' · Held ',string(sub(length(split(string(body('Filter_Open')),'"Status":"Held"')),1)),' · Transfered ',string(sub(length(split(string(body('Filter_Open')),'"Status":"Transfered"')),1)))</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b8a"><span>เพิ่ม <b>Compose</b> แล้ว Rename เป็น <code>Status Breakdown</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b8b"><span>วาง expression ด้านบน</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B9</span></div>
+        <p class="step-kicker">Data Operation · Select</p>
+        <h3 class="step-title">สร้าง JSON ของแถวตาราง</h3>
+        <div class="chips">
+          <span class="chip star">★ หัวใจของงาน</span>
+          <span class="chip">Rename เป็น: Select Rows</span>
+        </div>
+        <p class="step-desc">
+          ขั้นนี้คือตัวแทน templating engine ที่ Power Automate ไม่มี
+          Select จะวนข้อมูลทีละแถวแล้วปั้นออกมาเป็นก้อน <code>ColumnSet</code> ของ Adaptive Card
+          ได้ผลลัพธ์เป็น array 15 ก้อน = 15 แถวในตาราง
+        </p>
+        <div class="code">
+          <div class="code-head"><span class="code-name">From</span><button class="copy">คัดลอก</button></div>
+          <pre>outputs('Top_Jobs')</pre>
+        </div>
+        <div class="callout is-crit" style="margin-top:14px">
+          <h4>ก่อนวางช่อง Map ต้องกดปุ่ม T ก่อน</h4>
+          <p>
+            ที่ช่อง <b>Map</b> มีปุ่มรูปตัว <code>T</code> อยู่ทางขวา — กดเพื่อสลับจากโหมดตาราง key/value เป็นโหมดข้อความ
+            ถ้าลืมกดแล้ววาง JSON ลงในโหมดตาราง จะ error ทันที
+          </p>
+        </div>
+        <div class="code is-tall">
+          <div class="code-head"><span class="code-name">Map — 03-select-map.json (วางทั้งไฟล์)</span><button class="copy">คัดลอกทั้งหมด</button></div>
+          <pre id="selectMap">{
+  "type": "ColumnSet",
+  "separator": true,
+  "spacing": "Small",
+  "columns": [
+    {
+      "type": "Column",
+      "width": "12",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Sub System']}", "size": "Small", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "14",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Job ID']}", "size": "Small", "weight": "Bolder", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "10",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{if(equals(item()?['Priority'],'Critical'),'🔴',if(equals(item()?['Priority'],'Major'),'🟠','🟡'))} @{item()?['Priority']}",
+          "size": "Small",
+          "weight": "Bolder",
+          "wrap": true,
+          "spacing": "None",
+          "color": "@{if(equals(item()?['Priority'],'Critical'),'attention',if(equals(item()?['Priority'],'Major'),'warning','default'))}"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "12",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Create Time']}", "size": "Small", "wrap": true, "spacing": "None", "isSubtle": true }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "10",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{item()?['Status']}",
+          "size": "Small",
+          "weight": "Bolder",
+          "wrap": true,
+          "spacing": "None",
+          "color": "@{if(equals(item()?['Status'],'Held'),'attention',if(equals(item()?['Status'],'Transfered'),'warning',if(or(equals(item()?['Status'],'On-Site'),equals(item()?['Status'],'Departed')),'good',if(equals(item()?['Status'],'Accepted'),'accent','default'))))}"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "9",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Province Name']}", "size": "Small", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "20",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Site Name']}", "size": "Small", "wrap": true, "spacing": "None" }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "13",
+      "items": [
+        { "type": "TextBlock", "text": "@{item()?['Assign to']}", "size": "Small", "wrap": true, "spacing": "None", "isSubtle": true }
+      ]
+    }
+  ]
+}</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b9a"><span><b>+ New step</b> → <code>Data Operation</code> → <b>Select</b> → Rename เป็น <code>Select Rows</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b9b"><span>ช่อง From ใส่ expression <code>outputs('Top_Jobs')</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b9c"><span>กดปุ่ม <code>T</code> ที่ช่อง Map เพื่อสลับเป็นโหมดข้อความ</span></label></li>
+          <li><label><input type="checkbox" data-k="b9d"><span>วาง JSON ทั้งก้อนด้านบนลงในช่อง Map</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B10</span></div>
+        <p class="step-kicker">Data Operation · Compose</p>
+        <h3 class="step-title">ประกอบการ์ดทั้งใบ</h3>
+        <div class="chips"><span class="chip">Rename เป็น: Card JSON</span></div>
+        <p class="step-desc">
+          Power Automate จะแทนค่า <code>@{...}</code> ทุกจุดให้เป็นค่าจริงตอนรัน
+          จุดที่ต้องระวังที่สุดคือบรรทัด <code>"items": @{body('Select_Rows')}</code> —
+          <b>ห้ามใส่เครื่องหมายคำพูดครอบ</b> เพราะต้องยัด array เข้าไป ไม่ใช่ข้อความ
+        </p>
+        <div class="code is-tall">
+          <div class="code-head"><span class="code-name">Inputs — 04-card-powerautomate.json (วางทั้งไฟล์)</span><button class="copy">คัดลอกทั้งหมด</button></div>
+          <pre id="cardJson">{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.4",
+  "msteams": { "width": "Full" },
+  "body": [
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "bleed": true,
+      "spacing": "None",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "verticalContentAlignment": "Center",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "verticalContentAlignment": "Center",
+              "items": [
+                { "type": "TextBlock", "text": "🛠️", "size": "ExtraLarge", "spacing": "None" }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "verticalContentAlignment": "Center",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "CM-TRS Job Tracking · Daily Monitor",
+                  "size": "Large",
+                  "weight": "Bolder",
+                  "wrap": true,
+                  "spacing": "None"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "Zone @{first(body('Filter_Open'))?['Zone']} · Region @{first(body('Filter_Open'))?['Region']} · ประจำวันที่ @{formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'dd/MM/yyyy')}",
+                  "isSubtle": true,
+                  "size": "Small",
+                  "wrap": true,
+                  "spacing": "None"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "auto",
+              "verticalContentAlignment": "Center",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "@{length(body('Filter_Open'))}",
+                  "size": "ExtraLarge",
+                  "weight": "Bolder",
+                  "horizontalAlignment": "Right",
+                  "spacing": "None"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "OPEN JOBS",
+                  "size": "Small",
+                  "isSubtle": true,
+                  "horizontalAlignment": "Right",
+                  "spacing": "None"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "ColumnSet",
+      "spacing": "Medium",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "attention",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "🔴 Critical", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(body('Filter_Critical'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "warning",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "🟠 Major", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(body('Filter_Major'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "accent",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "🟡 Minor", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(body('Filter_Minor'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "25",
+          "style": "emphasis",
+          "spacing": "Small",
+          "items": [
+            { "type": "TextBlock", "text": "📋 Showing", "size": "Small", "weight": "Bolder", "horizontalAlignment": "Center", "wrap": true, "spacing": "None" },
+            { "type": "TextBlock", "text": "@{length(outputs('Top_Jobs'))}", "size": "ExtraLarge", "weight": "Bolder", "horizontalAlignment": "Center", "spacing": "None" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "TextBlock",
+      "text": "**Status:** @{outputs('Status_Breakdown')}",
+      "wrap": true,
+      "size": "Small",
+      "isSubtle": true,
+      "spacing": "Small"
+    },
+
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            { "type": "Column", "width": "12", "items": [ { "type": "TextBlock", "text": "Sub System",    "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "14", "items": [ { "type": "TextBlock", "text": "Job ID",        "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "10", "items": [ { "type": "TextBlock", "text": "Priority",      "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "12", "items": [ { "type": "TextBlock", "text": "Create Time",   "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "10", "items": [ { "type": "TextBlock", "text": "Status",        "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "9",  "items": [ { "type": "TextBlock", "text": "Province Name", "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "20", "items": [ { "type": "TextBlock", "text": "Site Name",     "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] },
+            { "type": "Column", "width": "13", "items": [ { "type": "TextBlock", "text": "Assign to",     "weight": "Bolder", "size": "Small", "wrap": true, "spacing": "None" } ] }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "Container",
+      "spacing": "None",
+      "items": @{body('Select_Rows')}
+    },
+
+    {
+      "type": "TextBlock",
+      "text": "@{if(greater(sub(length(body('Filter_Open')),length(outputs('Top_Jobs'))),0), concat('⚠️ แสดง ', string(length(outputs('Top_Jobs'))), ' รายการแรก (เรียงตาม Priority) · ยังมีอีก **', string(sub(length(body('Filter_Open')),length(outputs('Top_Jobs')))), '** รายการ — เปิดดูทั้งหมดได้ที่ปุ่มด้านล่าง'), '✅ แสดงครบทุกรายการแล้ว')}",
+      "wrap": true,
+      "size": "Small",
+      "color": "@{if(greater(sub(length(body('Filter_Open')),length(outputs('Top_Jobs'))),0),'warning','good')}",
+      "spacing": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "🤖 Generated by Power Automate · Run time @{formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'dd/MM/yyyy HH:mm')} (Asia/Bangkok)",
+      "wrap": true,
+      "size": "Small",
+      "isSubtle": true,
+      "spacing": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "📊 เปิด Dashboard",
+      "url": "https://panudechfight-gif.github.io/osp-improvement-dashboard/"
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "📁 เปิดไฟล์ต้นทาง (Excel / SharePoint)",
+      "url": "https://contoso.sharepoint.com/sites/NOC/Shared%20Documents/JobMonitor_CMTRS_Job_Tracking.xlsx"
+    }
+  ]
+}</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b10a"><span>เพิ่ม <b>Compose</b> แล้ว Rename เป็น <code>Card JSON</code></span></label></li>
+          <li><label><input type="checkbox" data-k="b10b"><span>วาง JSON ทั้งก้อนในช่อง Inputs</span></label></li>
+          <li><label><input type="checkbox" data-k="b10c"><span>ตรวจว่าบรรทัด <code>"items": @{body('Select_Rows')}</code> ไม่มี <code>"</code> ครอบ</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>B11</span></div>
+        <p class="step-kicker">Microsoft Teams</p>
+        <h3 class="step-title">ส่งการ์ดเข้า Teams</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>ช่อง</th><th>ค่าที่ต้องใส่</th></tr></thead>
+            <tbody>
+              <tr><th>Post as</th><td>Flow bot</td></tr>
+              <tr><th>Post in</th><td>Channel</td></tr>
+              <tr><th>Team</th><td>เลือกทีมของคุณ</td></tr>
+              <tr><th>Channel</th><td>เช่น <code>NOC-Daily-Report</code></td></tr>
+              <tr><th>Adaptive Card</th><td>expression: <code>outputs('Card_JSON')</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code">
+          <div class="code-head"><span class="code-name">ช่อง Adaptive Card</span><button class="copy">คัดลอก</button></div>
+          <pre>outputs('Card_JSON')</pre>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="b11a"><span><b>+ New step</b> → ค้นหา <code>Microsoft Teams</code> → <b>Post adaptive card in a chat or channel</b></span></label></li>
+          <li><label><input type="checkbox" data-k="b11b"><span>กรอกทั้ง 5 ช่องตามตารางด้านบน</span></label></li>
+          <li><label><input type="checkbox" data-k="b11c"><span>กด <b>Save</b> — ต้องไม่มี error สีแดงค้างอยู่</span></label></li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= PHASE C ================= -->
+  <section class="phase">
+    <div class="phase-head">
+      <span class="phase-tag">PHASE C</span>
+      <h2>ทดสอบและเปิดใช้จริง</h2>
+      <span class="sub">C1–C5</span>
+    </div>
+    <div class="steps">
+
+      <article class="step">
+        <div class="node"><span>C1</span></div>
+        <p class="step-kicker">Test</p>
+        <h3 class="step-title">รันทดสอบครั้งแรก</h3>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="c1a"><span>กด <b>Test</b> มุมขวาบน → <b>Manually</b> → <b>Test</b> → <b>Run flow</b></span></label></li>
+          <li><label><input type="checkbox" data-k="c1b"><span>รอจนทุก action ขึ้นเครื่องหมายถูกสีเขียว</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>C2</span></div>
+        <p class="step-kicker">Run history</p>
+        <h3 class="step-title">ไล่ตรวจผลลัพธ์ทีละ action</h3>
+        <p class="step-desc">
+          ถ้าการ์ดออกมาไม่ถูก ให้ไล่ย้อนจากล่างขึ้นบนตามลำดับนี้ จะเจอต้นตอเร็วที่สุด
+        </p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>คลิกดู action</th><th>ต้องเห็นอะไร</th></tr></thead>
+            <tbody>
+              <tr><th>List rows…</th><td>value เป็น array มีข้อมูลครบทุกแถว</td></tr>
+              <tr><th>Filter Open</th><td>array ที่ตัดงานปิดออกแล้ว — จดชื่อ key ไว้เทียบกับ expression</td></tr>
+              <tr><th>Top Jobs</th><td>array 15 ก้อน เรียง Critical ขึ้นก่อน</td></tr>
+              <tr><th>Select Rows</th><td>array ของ ColumnSet 15 ก้อน ไม่ใช่ array ว่าง</td></tr>
+              <tr><th>Card JSON</th><td>JSON การ์ดสมบูรณ์ ไม่มี <code>@{</code> หลงเหลือ</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="c2a"><span>ตรวจ output ครบทั้ง 5 action ตามตาราง</span></label></li>
+          <li><label><input type="checkbox" data-k="c2b"><span>ยืนยันว่าใน Card JSON ไม่มีข้อความ <code>@{</code> หรือ <code>${</code> หลงเหลือ</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>C3</span></div>
+        <p class="step-kicker">Microsoft Teams</p>
+        <h3 class="step-title">ตรวจการ์ดที่ส่งไปจริง</h3>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="c3a"><span>เปิด Channel ปลายทาง — เห็นการ์ดจาก Flow bot</span></label></li>
+          <li><label><input type="checkbox" data-k="c3b"><span>หัวตารางครบ 8 คอลัมน์: Sub System · Job ID · Priority · Create Time · Status · Province Name · Site Name · Assign to</span></label></li>
+          <li><label><input type="checkbox" data-k="c3c"><span>Priority มีไอคอนและสี — Critical แดง, Major ส้ม</span></label></li>
+          <li><label><input type="checkbox" data-k="c3d"><span>Status มีสี — Held แดง, On-Site เขียว</span></label></li>
+          <li><label><input type="checkbox" data-k="c3e"><span>ตัวเลข 4 ช่องด้านบน (Critical/Major/Minor/Showing) ตรงกับข้อมูลจริง</span></label></li>
+          <li><label><input type="checkbox" data-k="c3f"><span>เปิดดูบนมือถือด้วย — ข้อความต้องไม่ถูกตัดหาย</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>C4</span></div>
+        <p class="step-kicker">Card JSON</p>
+        <h3 class="step-title">แก้ URL ปุ่มให้เป็นของจริง</h3>
+        <p class="step-desc">
+          ปุ่มที่สองยังชี้ไปที่ <code>contoso.sharepoint.com</code> ซึ่งเป็นตัวอย่าง ต้องเปลี่ยนเป็น URL ไฟล์จริงที่คัดลอกไว้ตอนขั้น A3
+        </p>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="c4a"><span>กลับไปที่ Compose <code>Card JSON</code> เลื่อนลงหาส่วน <code>actions</code></span></label></li>
+          <li><label><input type="checkbox" data-k="c4b"><span>แทน URL <code>contoso.sharepoint.com/...</code> ด้วย URL ไฟล์จริง</span></label></li>
+          <li><label><input type="checkbox" data-k="c4c"><span>ตรวจว่าปุ่ม Dashboard ชี้ไปที่ URL ที่ถูกต้อง</span></label></li>
+          <li><label><input type="checkbox" data-k="c4d"><span>Save แล้วรัน Test อีกครั้ง กดปุ่มบนการ์ดทดสอบว่าเปิดได้จริง</span></label></li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="node"><span>C5</span></div>
+        <p class="step-kicker">Go live</p>
+        <h3 class="step-title">เปิดใช้งานจริงและกันพัง</h3>
+        <ul class="checks">
+          <li><label><input type="checkbox" data-k="c5a"><span>ตรวจว่าสถานะ Flow เป็น <b>On</b></span></label></li>
+          <li><label><input type="checkbox" data-k="c5b"><span>เพิ่ม <b>co-owner</b> อีกคน — กัน Flow ตายเมื่อเจ้าของลาออกหรือถูกปิดบัญชี</span></label></li>
+          <li><label><input type="checkbox" data-k="c5c"><span>ตั้งการแจ้งเตือนเมื่อ Flow ล้มเหลว ที่หน้า My flows → <b>Analytics</b> หรือสร้าง Flow แจ้งเตือนแยก</span></label></li>
+          <li><label><input type="checkbox" data-k="c5d"><span>ตรวจว่า connection ของ Excel และ Teams ไม่มีสถานะ <b>Fix connection</b></span></label></li>
+          <li><label><input type="checkbox" data-k="c5e"><span>รอดูรอบจริงวันถัดไปเวลา 08:00 ว่ายิงเองได้</span></label></li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= APPENDIX ================= -->
+  <section class="appendix">
+    <h2>ภาคผนวก</h2>
+    <p style="color:var(--muted);font-size:14.5px">ข้อมูลอ้างอิงระหว่างทำและตอนแก้ปัญหา</p>
+
+    <h3>โครงสร้าง Flow ทั้งหมด</h3>
+    <div class="flowmap">
+<pre>⏰ Recurrence                      ทุกวัน 08:00 (Bangkok)
+│
+├─ 📊 List rows present in a table     Excel: JobTable  + Pagination
+│
+├─ 🔍 Filter Open                      ตัดงานที่ปิดแล้วออก
+├─ 🔍 Filter Critical                  นับ Critical
+├─ 🔍 Filter Major                     นับ Major
+├─ 🔍 Filter Minor                     นับ Minor
+│
+├─ 🔀 Sorted Jobs      (Compose)       union() → Critical มาก่อน
+├─ ✂️  Top Jobs         (Compose)       take(...,15)
+├─ 🔢 Status Breakdown (Compose)       นับแยก Status ด้วย split()
+│
+├─ 🧱 Select Rows      (Select)        สร้าง ColumnSet 15 แถว   ★
+├─ 🎴 Card JSON        (Compose)       ประกอบการ์ดทั้งใบ
+│
+└─ 💬 Post adaptive card in a chat or channel</pre>
+    </div>
+
+    <h3>Expression ทั้งหมดในที่เดียว</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ใช้ที่</th><th>Expression</th></tr></thead>
+        <tbody>
+          <tr><th>Filter Open — From</th><td><code>body('List_rows_present_in_a_table')?['value']</code></td></tr>
+          <tr><th>Filter Open — เงื่อนไข</th><td><code>@and(not(equals(item()?['Status'],'Closed')),not(equals(item()?['Status'],'Cancelled')))</code></td></tr>
+          <tr><th>Filter Critical/Major/Minor — From</th><td><code>body('Filter_Open')</code></td></tr>
+          <tr><th>Sorted Jobs</th><td><code>union(union(body('Filter_Critical'),body('Filter_Major')),body('Filter_Minor'))</code></td></tr>
+          <tr><th>Top Jobs</th><td><code>take(outputs('Sorted_Jobs'),15)</code></td></tr>
+          <tr><th>Select Rows — From</th><td><code>outputs('Top_Jobs')</code></td></tr>
+          <tr><th>Teams — Adaptive Card</th><td><code>outputs('Card_JSON')</code></td></tr>
+          <tr><th>จำนวนทั้งหมด</th><td><code>length(body('Filter_Open'))</code></td></tr>
+          <tr><th>จำนวนที่แสดง</th><td><code>length(outputs('Top_Jobs'))</code></td></tr>
+          <tr><th>จำนวนที่เหลือ</th><td><code>sub(length(body('Filter_Open')),length(outputs('Top_Jobs')))</code></td></tr>
+          <tr><th>วันที่แบบไทย</th><td><code>formatDateTime(convertTimeZone(utcNow(),'UTC','SE Asia Standard Time'),'dd/MM/yyyy')</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>กติกาสีบนการ์ด</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>คอลัมน์</th><th>ค่า</th><th>สีที่แสดง</th></tr></thead>
+        <tbody>
+          <tr><th rowspan="3">Priority</th><td>Critical 🔴</td><td style="color:var(--crit);font-weight:600">attention · แดง</td></tr>
+          <tr><td>Major 🟠</td><td style="color:var(--warn);font-weight:600">warning · ส้ม</td></tr>
+          <tr><td>Minor 🟡</td><td style="color:var(--muted)">default</td></tr>
+          <tr><th rowspan="5">Status</th><td>Held</td><td style="color:var(--crit);font-weight:600">attention · แดง — งานค้าง ต้องตาม</td></tr>
+          <tr><td>Transfered</td><td style="color:var(--warn);font-weight:600">warning · ส้ม — โอนงานออก</td></tr>
+          <tr><td>On-Site / Departed</td><td style="color:var(--good);font-weight:600">good · เขียว — ทีมเคลื่อนแล้ว</td></tr>
+          <tr><td>Accepted</td><td style="color:var(--accent);font-weight:600">accent · น้ำเงิน — รับงานแล้ว</td></tr>
+          <tr><td>Assigned</td><td style="color:var(--muted)">default — เพิ่งมอบหมาย</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>แก้ปัญหาที่เจอบ่อย</h3>
+
+    <details>
+      <summary>การ์ดขึ้นตัวอักษร ${jobs} ดิบ ๆ ไม่มีข้อมูล</summary>
+      <div class="details-body">
+        เอาไฟล์ <code>01-card-template.json</code> ไปใช้ใน Flow ซึ่งเป็นเวอร์ชันสำหรับ Designer เท่านั้น
+        ให้เปลี่ยนไปใช้ <code>04-card-powerautomate.json</code> ในขั้น B10 แทน
+      </div>
+    </details>
+
+    <details>
+      <summary>ขึ้น error: The template language expression … cannot be evaluated</summary>
+      <div class="details-body">
+        ชื่อ action ไม่ตรงกับที่ expression อ้างถึง ไล่เช็กชื่อทุก action ให้ตรงกับที่ระบุในแต่ละขั้น
+        จำไว้ว่าเว้นวรรคในชื่อจะกลายเป็น <code>_</code> เช่น <code>Filter Open</code> → <code>Filter_Open</code>
+      </div>
+    </details>
+
+    <details>
+      <summary>ตารางบนการ์ดว่างเปล่า ไม่มีแถวเลย</summary>
+      <div class="details-body">
+        เปิด Run history ดู output ของ <code>Top Jobs</code> ก่อน ถ้าว่างแปลว่าปัญหาอยู่ที่ Filter
+        ถ้ามีข้อมูลแต่ <code>Select Rows</code> ว่าง แปลว่าช่อง From ผิด — ต้องเป็น <code>outputs('Top_Jobs')</code>
+      </div>
+    </details>
+
+    <details>
+      <summary>บางคอลัมน์ว่าง ทั้งที่ใน Excel มีข้อมูล</summary>
+      <div class="details-body">
+        ชื่อคอลัมน์สะกดไม่ตรง เปิด Run history → ดู output ดิบของ <code>Filter Open</code> →
+        คัดลอกชื่อ key มาใส่ใน <code>item()?['...']</code> ให้ตรงทั้งตัวพิมพ์เล็กพิมพ์ใหญ่และเว้นวรรค
+      </div>
+    </details>
+
+    <details>
+      <summary>Create Time ขึ้นเป็นตัวเลข 46265.69</summary>
+      <div class="details-body">
+        เซลล์ใน Excel เป็นชนิด Date ไม่ใช่ข้อความ กลับไปทำขั้น A2 เพิ่มคอลัมน์ช่วยด้วยสูตร
+        <code>=TEXT([@[Create Time]],"dd-mmm-yy hh:mm")</code> แล้วชี้ Flow มาที่คอลัมน์ใหม่
+      </div>
+    </details>
+
+    <details>
+      <summary>Teams ไม่ส่งการ์ด หรือขึ้น error เรื่องขนาด</summary>
+      <div class="details-body">
+        การ์ดใหญ่เกินขีดจำกัดของ Teams ประมาณ 28 KB ลดเลขในขั้น B7 จาก
+        <code>take(outputs('Sorted_Jobs'),15)</code> เหลือ <code>10</code>
+      </div>
+    </details>
+
+    <details>
+      <summary>ได้ข้อมูลแค่ 256 แถว ทั้งที่ไฟล์มีมากกว่านั้น</summary>
+      <div class="details-body">
+        ยังไม่ได้เปิด Pagination กลับไปขั้น B3 → คลิก <code>…</code> บน action → <b>Settings</b> →
+        Pagination = On → Threshold 5000
+      </div>
+    </details>
+
+    <details>
+      <summary>การ์ดแคบ ตารางอัดกันจนอ่านไม่ออก</summary>
+      <div class="details-body">
+        ตรวจว่าใน Card JSON มีบรรทัด <code>"msteams": { "width": "Full" }</code> อยู่ใกล้ ๆ ด้านบน
+        ถ้าหายไปการ์ดจะไม่ขยายเต็มความกว้างของ Teams
+      </div>
+    </details>
+
+    <details>
+      <summary>Status Breakdown ขึ้นเลข 0 ทุกตัว</summary>
+      <div class="details-body">
+        รูปแบบ JSON ที่ <code>string()</code> คืนมาไม่ตรงกับคำที่ใช้ split
+        เปิด Run history ดู output ดิบของ <code>Filter Open</code> แล้วแก้คำใน <code>split()</code>
+        ให้ตรงกับที่เห็นจริง
+      </div>
+    </details>
+
+    <h3>ปรับแต่งเพิ่มเติม</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>อยากได้</th><th>แก้ที่ไหน</th></tr></thead>
+        <tbody>
+          <tr><th>เปลี่ยนจำนวนแถว</th><td>ขั้น B7 → <code>take(outputs('Sorted_Jobs'),20)</code></td></tr>
+          <tr><th>ส่งเฉพาะ Critical</th><td>ขั้น B6 → เปลี่ยนเป็น <code>body('Filter_Critical')</code> เฉย ๆ</td></tr>
+          <tr><th>กรองเฉพาะ Zone ตัวเอง</th><td>ขั้น B4 → <code>@and(equals(item()?['Zone'],'RC3-UDN'),not(equals(item()?['Status'],'Closed')))</code></td></tr>
+          <tr><th>แยกการ์ดตามจังหวัด</th><td>ครอบขั้น B5–B11 ด้วย <b>Apply to each</b> บนรายชื่อจังหวัด</td></tr>
+          <tr><th>ส่งเข้าแชทส่วนตัว</th><td>ขั้น B11 → เปลี่ยน Post in เป็น <b>Chat with Flow bot</b> แล้วใส่ Recipient</td></tr>
+          <tr><th>เพิ่มปุ่มโทรหาช่าง</th><td>ขั้น B10 → เพิ่มใน <code>actions</code>: <code>{ "type": "Action.OpenUrl", "title": "โทรหาช่าง", "url": "tel:0657152305" }</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>ข้อมูลอ้างอิงจากไฟล์ตัวอย่าง</h3>
+    <p style="color:var(--ink-2);font-size:14.5px">
+      snapshot วันที่ 15-Aug-26 — รวม <b>29 jobs</b> · Critical 6 · Major 23 · Minor 0 ·
+      ทั้งหมดอยู่ใน Zone <code>RC3-UDN</code> Region <code>NorthEast</code>
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>มิติ</th><th>การกระจายตัว</th></tr></thead>
+        <tbody>
+          <tr><th>Sub System</th><td>Splitter-OSP 13 · Transmission-OSP 11 · Power System 3 · FTTH-OSP 1 · EDS-OSP 1</td></tr>
+          <tr><th>Status</th><td>Assigned 17 · On-Site 7 · Held 2 · Departed 1 · Accepted 1 · Transfered 1</td></tr>
+          <tr><th>จังหวัด</th><td>อุดรธานี 17 · บึงกาฬ 5 · หนองบัวลำภู 3 · หนองคาย 3 · เลย 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="foot">
+      ความคืบหน้าเก็บไว้ใน localStorage ของเบราว์เซอร์นี้เท่านั้น ไม่ได้ส่งขึ้นเซิร์ฟเวอร์
+      · เปิดคนละเครื่องหรือคนละเบราว์เซอร์จะเริ่มนับใหม่
+    </p>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "cmtrs-flow-runbook-v1";
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.checks input[type=checkbox]'));
+  var state = {};
+
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; }
+  catch (e) { state = {}; }
+
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 1600);
+  }
+
+  function refresh(){
+    var done = 0;
+    boxes.forEach(function(b){
+      if (b.checked) done++;
+      var li = b.closest('li');
+      if (li) li.classList.toggle('ticked', b.checked);
+    });
+    var total = boxes.length;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    document.getElementById('pDone').textContent = done;
+    document.getElementById('pTotal').textContent = total;
+    document.getElementById('pPct').textContent = pct;
+    document.getElementById('pBar').style.width = pct + '%';
+
+    document.querySelectorAll('.step').forEach(function(step){
+      var kids = step.querySelectorAll('.checks input[type=checkbox]');
+      var all = kids.length > 0;
+      kids.forEach(function(k){ if (!k.checked) all = false; });
+      step.classList.toggle('done', all);
+    });
+  }
+
+  boxes.forEach(function(b){
+    var k = b.dataset.k;
+    if (state[k]) b.checked = true;
+    b.addEventListener('change', function(){
+      if (b.checked) state[k] = 1; else delete state[k];
+      save();
+      refresh();
+    });
+  });
+
+  document.getElementById('btnReset').addEventListener('click', function(){
+    if (!confirm('ล้างเครื่องหมายถูกทั้งหมดและเริ่มนับใหม่?')) return;
+    state = {};
+    save();
+    boxes.forEach(function(b){ b.checked = false; });
+    refresh();
+    toast('ล้างความคืบหน้าแล้ว');
+  });
+
+  var btnFilter = document.getElementById('btnFilter');
+  btnFilter.addEventListener('click', function(){
+    var on = document.body.classList.toggle('hide-done');
+    btnFilter.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btnFilter.textContent = on ? 'แสดงทั้งหมด' : 'ซ่อนที่ทำแล้ว';
+  });
+
+  function copyText(text, done){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function(){ fallback(text, done); });
+    } else {
+      fallback(text, done);
+    }
+  }
+  function fallback(text, done){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); }
+    catch (e) { toast('คัดลอกไม่สำเร็จ — กดเลือกข้อความเองแล้ว Ctrl+C'); }
+    document.body.removeChild(ta);
+  }
+
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var block = btn.closest('.code');
+      var pre = block ? block.querySelector('pre') : null;
+      if (!pre) return;
+      var label = btn.textContent;
+      copyText(pre.textContent, function(){
+        btn.textContent = 'คัดลอกแล้ว ✓';
+        btn.classList.add('ok');
+        toast('คัดลอกเรียบร้อย — ไปวางใน Power Automate ได้เลย');
+        setTimeout(function(){
+          btn.textContent = label;
+          btn.classList.remove('ok');
+        }, 1800);
+      });
+    });
+  });
+
+  refresh();
+})();
+</script>
