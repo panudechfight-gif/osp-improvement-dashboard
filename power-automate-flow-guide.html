@@ -287,6 +287,11 @@ button.copy.done{background:var(--code-key);color:#16210c;border-color:var(--cod
 .reset:focus-visible{outline:2px solid var(--green-bright);outline-offset:2px;}
 
 /* ---------- misc ---------- */
+kbd{
+  font-family:var(--mono);font-size:.82em;
+  background:var(--surface-2);border:1px solid var(--line-strong);
+  border-bottom-width:2px;border-radius:5px;padding:1px 6px;white-space:nowrap;
+}
 ul.plain{padding-inline-start:22px;margin:0 0 16px;}
 ul.plain li{margin-bottom:7px;}
 .foot{
@@ -579,6 +584,54 @@ ul.plain li{margin-bottom:7px;}
   </div>
 </section>
 
+<section id="bugfix">
+  <div class="section-head">
+    <h2>บั๊กที่เจอใน Flow ตัวจริง · CMTRS_Daily_Job_Monitor_0800</h2>
+    <p class="lede" style="margin-bottom:0">ตรวจจากไฟล์ export <code>.zip</code> เทียบกับข้อมูลจริง 125 แถว — เจอ 5 จุด ตัวที่ทำให้การ์ดว่างคือข้อ 1</p>
+  </div>
+
+  <div class="note stop">
+    <span class="tt">ต้นเหตุหลัก · ชื่อคีย์มี Enter ติดมาด้วย</span>
+    <p>ใน <code>Select_Normalize_Jobs</code> ช่องชื่อคีย์ทางซ้าย <b>7 จาก 8 ช่อง</b> มีตัวขึ้นบรรทัดใหม่ติดท้าย กลายเป็น <code>"Sub System\n"</code> แทนที่จะเป็น <code>"Sub System"</code></p>
+    <p>พอถึงขั้น <code>Select_Job_Rows</code> การ์ดไปเรียก <code>item()?['Sub System']</code> (ไม่มี <code>\n</code>) จึงหาไม่เจอ → ได้ค่าว่าง → ตกไปใช้ค่าสำรอง <code>'-'</code> ทุกช่อง</p>
+    <p><b>สังเกตให้ดี:</b> คอลัมน์ <code>Status</code> เป็นช่องเดียวที่ไม่มี <code>\n</code> ติดมา และเป็นช่องเดียวที่แสดงผลถูกต้องบนการ์ด — ตรงกันเป๊ะกับอาการที่เห็น</p>
+  </div>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>จุดที่ผิด</th><th>ผลที่เห็นบนการ์ด</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>Select_Normalize_Jobs</code> — คีย์ 7 ตัวมี <code>\n</code> ต่อท้าย</td><td>Sub System / Job ID / Create Time / Province / Site Name ว่างเป็น <b>-</b> · Priority เป็น <b>Minor</b> ทุกแถว · Assign to เป็น <b>Unassigned</b> ทุกแถว</td></tr>
+      <tr><td>2</td><td><code>Create Time</code> ใช้ <code>formatDateTime()</code> แต่ค่าในไฟล์เป็น <b>ข้อความ</b> <code>15-Aug-26 16:43</code></td><td>ถึงแก้ข้อ 1 แล้วก็ยังเสี่ยง Action ล้มด้วย error แปลงวันที่ไม่ได้</td></tr>
+      <tr><td>3</td><td><code>Filter_Open_Jobs</code> เงื่อนไขเป็น <code>@equals(true,true)</code></td><td>ไม่ได้กรองอะไรเลย งานที่ปิดแล้วก็หลุดเข้ามาด้วย</td></tr>
+      <tr><td>4</td><td><code>Compose_Sorted_Jobs</code> ชี้กลับไปที่ <code>Filter_Open_Jobs</code> ตรง ๆ</td><td>ไม่ได้เรียงตามความรุนแรง · <code>Filter_Critical/Major/Minor</code> คำนวณทิ้งไว้เฉย ๆ ไม่มีใครใช้ → <b>Critical 6 งานไม่เคยขึ้นการ์ดเลย</b> เพราะโดน Minor 12 แถวแรกกินที่หมด</td></tr>
+      <tr><td>5</td><td><code>Compose_RunTime</code> คำนวณไว้แต่ไม่มี <code>__RUN_TIME__</code> ในการ์ด</td><td>บนการ์ดบอกแค่ "แสดง 12 รายการ" ไม่รู้ว่าจากทั้งหมดกี่งาน และข้อมูลสดแค่ไหน</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>สูตรที่แก้แล้ว</h3>
+  <p>ถ้าจะแก้เองในหน้า Designer ให้ทำ 4 จุดนี้ (ข้อ 1 สำคัญสุด)</p>
+
+  <div class="note warn">
+    <span class="tt">จุดที่ 1 · Select_Normalize_Jobs</span>
+    <p>คลิกในช่องชื่อคีย์ทางซ้ายทั้ง 7 ช่อง → กด <kbd>End</kbd> แล้ว <kbd>Backspace</kbd> จนเคอร์เซอร์ขยับขึ้นมาชิดตัวอักษรสุดท้าย → <b>อย่ากด Enter</b> ให้กด <kbd>Tab</kbd> ออกจากช่องแทน ชื่อที่ถูกต้องคือ <code>Sub System</code> · <code>Job ID</code> · <code>Priority</code> · <code>Create Time</code> · <code>Status</code> · <code>Province Name</code> · <code>Site Name</code> · <code>Assign to</code></p>
+  </div>
+
+  <div class="snippet"><header><span class="label">จุดที่ 2 · ค่าของคีย์ Create Time</span><button class="copy" type="button">คัดลอก</button></header><pre>if(empty(coalesce(item()?['Create Time'],'')),'—',if(contains(string(item()?['Create Time']),'T'),formatDateTime(item()?['Create Time'],'dd-MMM-yy HH:mm'),string(item()?['Create Time'])))</pre></div>
+  <p style="margin-top:-4px;font-size:14.5px;color:var(--ink-soft)">รับได้ทั้งกรณีเป็นข้อความจาก Excel และเป็น ISO datetime จาก SharePoint</p>
+
+  <div class="snippet"><header><span class="label">จุดที่ 3 · Filter_Open_Jobs (advanced mode)</span><button class="copy" type="button">คัดลอก</button></header><pre>@not(contains(createArray('closed','completed','cancelled','resolved'),toLower(trim(coalesce(item()?['Status'],'')))))</pre></div>
+
+  <div class="snippet"><header><span class="label">จุดที่ 4 · Compose_Sorted_Jobs</span><button class="copy" type="button">คัดลอก</button></header><pre>concat(body('Filter_Critical'),body('Filter_Major'),body('Filter_Minor'))</pre></div>
+
+  <div class="note">
+    <span class="tt">ผลหลังแก้ (ทดสอบกับข้อมูลจริง 125 แถวแล้ว)</span>
+    <p>การ์ดขึ้นครบทั้ง 8 คอลัมน์ · 12 แถวแรกกลายเป็น <b>Critical 6 งาน ตามด้วย Major 6 งาน</b> · หัวการ์ดสรุปว่า <i>แสดง 12 จาก 125 รายการ · Critical 6 · Major 23 · Minor 96</i> · ขนาดการ์ด <b>19.1 KB</b> ยังห่างลิมิต 28 KB อยู่ 8.9 KB</p>
+  </div>
+
+  <p>หรือจะข้ามการแก้มือ ใช้ไฟล์ <code>CMTRS_Daily_Job_Monitor_0800_FIXED.zip</code> ที่แก้ให้แล้วก็ได้ — เข้า Power Automate › <b>My flows</b> › <b>Import</b> › <b>Import Package (Legacy)</b> อัปโหลดไฟล์ → ที่บรรทัด flow กด <b>Select during import</b> เลือก <b>Update</b> แล้วชี้ไป flow เดิม → ผูก connection ของ Excel และ Teams ให้ครบ → <b>Import</b></p>
+  <div class="note warn"><p>การ์ดที่แก้แล้วยังชี้ไปที่ Group chat และไฟล์ Excel เดิมของคุณ ถ้าเปลี่ยนห้องหรือย้ายไฟล์ ต้องตั้งใหม่ในขั้นที่ 3 และขั้นที่ 9</p></div>
+</section>
+
 <section>
   <div class="section-head">
     <h2>เจอปัญหา แก้ตรงนี้</h2>
@@ -588,6 +641,8 @@ ul.plain li{margin-bottom:7px;}
     <tbody>
       <tr><td>Flow ขึ้นเขียว แต่การ์ดไม่โผล่ใน Teams</td><td>การ์ดเกิน 28 KB → ลดเลข <code>12</code> ใน <code>Compose_Top_Jobs</code> ลง</td></tr>
       <tr><td>การ์ดขึ้นแต่ตารางว่างเปล่า</td><td>ชื่อ Action ในสูตรไม่ตรงกับชื่อจริง — เว้นวรรคต้องเป็น <code>_</code></td></tr>
+      <tr><td>ทุกคอลัมน์เป็น <b>-</b> ยกเว้น Status · Priority เป็น Minor หมด · Assign to เป็น Unassigned หมด</td><td>ชื่อคีย์ในช่อง Map ของ Select มี <b>Enter ติดท้าย</b> → ดู <a href="#bugfix">หัวข้อบั๊กด้านบน</a></td></tr>
+      <tr><td>Critical ไม่เคยโผล่บนการ์ด ทั้งที่มีในไฟล์</td><td><code>Compose_Sorted_Jobs</code> ไม่ได้ต่อ 3 กองตามลำดับ → ใช้ <code>concat(body('Filter_Critical'),body('Filter_Major'),body('Filter_Minor'))</code></td></tr>
       <tr><td>ได้ข้อมูลมาแค่ 256 แถว</td><td>ยังไม่ได้เปิด Pagination + Top Count ในขั้นที่ 3</td></tr>
       <tr><td>Create Time ออกมาเป็นตัวเลข เช่น <code>46249.26</code></td><td>Excel ส่ง serial date มา ใช้สูตรแปลงด้านล่าง</td></tr>
       <tr><td><code>BadRequest: Invalid JSON</code></td><td>เผลอใส่ <code>"</code> ครอบ <code>@{body('Select_Job_Rows')}</code> — ต้องไม่มี</td></tr>
