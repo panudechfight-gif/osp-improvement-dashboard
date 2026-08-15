@@ -1,0 +1,118 @@
+{
+  "type": "ColumnSet",
+  "separator": true,
+  "spacing": "Small",
+  "columns": [
+    {
+      "type": "Column",
+      "width": "15",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{coalesce(item()?['Sub System'], '-')}",
+          "size": "Small",
+          "wrap": true,
+          "spacing": "None"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "16",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{coalesce(item()?['Job ID'], '-')}",
+          "size": "Small",
+          "weight": "Bolder",
+          "wrap": true,
+          "spacing": "None"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "11",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{if(equals(item()?['Priority'],'Critical'),'🔴 ',if(equals(item()?['Priority'],'Major'),'🟠 ','🟡 '))}@{coalesce(item()?['Priority'], 'Minor')}",
+          "size": "Small",
+          "weight": "Bolder",
+          "wrap": true,
+          "spacing": "None",
+          "color": "@{if(equals(item()?['Priority'],'Critical'),'attention',if(equals(item()?['Priority'],'Major'),'warning','default'))}"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "14",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{coalesce(item()?['Create Time'], '-')}",
+          "size": "Small",
+          "isSubtle": true,
+          "wrap": true,
+          "spacing": "None"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "12",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{coalesce(item()?['Status'], '-')}",
+          "size": "Small",
+          "weight": "Bolder",
+          "wrap": true,
+          "spacing": "None",
+          "color": "@{if(equals(item()?['Status'],'Interupted'),'attention',if(equals(item()?['Status'],'Held'),'warning',if(or(equals(item()?['Status'],'On-Site'),equals(item()?['Status'],'Departed')),'good','accent')))}"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "11",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{coalesce(item()?['Province Name'], '-')}",
+          "size": "Small",
+          "wrap": true,
+          "spacing": "None"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "21",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{coalesce(item()?['Site Name'], '-')}",
+          "size": "Small",
+          "wrap": true,
+          "spacing": "None"
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "width": "16",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "@{coalesce(item()?['Assign to'], 'Unassigned')}",
+          "size": "Small",
+          "isSubtle": true,
+          "wrap": true,
+          "spacing": "None"
+        }
+      ]
+    }
+  ]
+}

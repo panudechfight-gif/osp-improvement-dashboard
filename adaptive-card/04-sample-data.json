@@ -1,0 +1,135 @@
+{
+  "reportDate": "15 Aug 2026",
+  "runTime": "15-Aug-26 08:00",
+  "zone": "RC3-UDN",
+  "region": "NorthEast",
+  "total": 117,
+  "critical": 7,
+  "major": 18,
+  "minor": 91,
+  "shown": 12,
+  "more": 105,
+  "statusBreakdown": "Interupted 46, Assigned 43, Transfered 9, On-Site 7, Accepted 6",
+  "jobs": [
+    {
+      "Sub System": "FTTH-OSP",
+      "Job ID": "JB26-1716392",
+      "Priority": "Critical",
+      "Create Time": "15-Aug-26 06:17",
+      "Status": "On-Site",
+      "Province Name": "อุดรธานี",
+      "Site Name": "OLT 3BB ปอพาน HF3003-228",
+      "Assign to": "Thirasak Phomphithak"
+    },
+    {
+      "Sub System": "FTTH-OSP",
+      "Job ID": "JB26-1716702",
+      "Priority": "Critical",
+      "Create Time": "15-Aug-26 07:37",
+      "Status": "On-Site",
+      "Province Name": "อุดรธานี",
+      "Site Name": "OLT 3BB คำเจริญ HF3002-218",
+      "Assign to": "Satthakit Sunthorntrae"
+    },
+    {
+      "Sub System": "Transmission-OSP",
+      "Job ID": "JB26-1716551",
+      "Priority": "Critical",
+      "Create Time": "15-Aug-26 07:03",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "ME 3BB ผาสุก ME-3013-42",
+      "Assign to": "Satthakit Sunthorntrae"
+    },
+    {
+      "Sub System": "Transmission-OSP",
+      "Job ID": "JB26-1716559",
+      "Priority": "Critical",
+      "Create Time": "15-Aug-26 07:04",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "WDM 3BB ชุมสายNGWDMผาสุก NE_WCO_3013_031_1H_A",
+      "Assign to": "Thirasak Phomphithak"
+    },
+    {
+      "Sub System": "Splitter-OSP",
+      "Job ID": "JB26-1711593",
+      "Priority": "Minor",
+      "Create Time": "14-Aug-26 13:43",
+      "Status": "Created",
+      "Province Name": "บึงกาฬ",
+      "Site Name": "OLT 3BB เจริญสว่าง HF3806-93",
+      "Assign to": "Workforce NER Pool"
+    },
+    {
+      "Sub System": "FTTH-ISP",
+      "Job ID": "JB26-1337559",
+      "Priority": "Minor",
+      "Create Time": "29-Jun-26 17:59",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "OLT 3BB กระพี้ HF3008-207",
+      "Assign to": "Santi Chuykumchoo"
+    },
+    {
+      "Sub System": "Transmission-OSP",
+      "Job ID": "JB26-1474165",
+      "Priority": "Minor",
+      "Create Time": "16-Jul-26 08:11",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "ME 3BB สวนมอญ ME-3020-73",
+      "Assign to": "Arthit Khammuen"
+    },
+    {
+      "Sub System": "Splitter-OSP",
+      "Job ID": "JB26-1517667",
+      "Priority": "Minor",
+      "Create Time": "21-Jul-26 22:01",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "OLT 3BB หนองบัวสะอาด HF3018-88",
+      "Assign to": "Arthit Khammuen"
+    },
+    {
+      "Sub System": "Transmission-OSP",
+      "Job ID": "JB26-1540280",
+      "Priority": "Minor",
+      "Create Time": "23-Jul-26 22:28",
+      "Status": "Assigned",
+      "Province Name": "หนองบัวลำภู",
+      "Site Name": "ME 3BB วิจารรังสรรค์ ME-3101-33",
+      "Assign to": "Kritsada Sopai"
+    },
+    {
+      "Sub System": "Splitter-OSP",
+      "Job ID": "JB26-1598529",
+      "Priority": "Minor",
+      "Create Time": "01-Aug-26 17:01",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "OLT 3BB บุ่งหมากลาน HF3002-211",
+      "Assign to": "Jirayut Putthawong"
+    },
+    {
+      "Sub System": "Transmission-OSP",
+      "Job ID": "JB26-1601864",
+      "Priority": "Minor",
+      "Create Time": "02-Aug-26 11:23",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "ME 3BB บ้านนาดี ME-3002-89",
+      "Assign to": "Arthit Khammuen"
+    },
+    {
+      "Sub System": "Splitter-OSP",
+      "Job ID": "JB26-1602975",
+      "Priority": "Minor",
+      "Create Time": "02-Aug-26 15:43",
+      "Status": "Assigned",
+      "Province Name": "อุดรธานี",
+      "Site Name": "OLT 3BB บ้านโพน HF3004-126",
+      "Assign to": "Kritsada Sopai"
+    }
+  ]
+}

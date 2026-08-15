@@ -1,0 +1,69 @@
+{
+  "type": "Container",
+  "separator": true,
+  "spacing": "Small",
+  "items": [
+    {
+      "type": "ColumnSet",
+      "spacing": "None",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "@{if(equals(item()?['Priority'],'Critical'),'🔴',if(equals(item()?['Priority'],'Major'),'🟠','🟡'))}",
+              "spacing": "None"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "@{coalesce(item()?['Job ID'], '-')} · @{coalesce(item()?['Sub System'], '-')}",
+              "weight": "Bolder",
+              "wrap": true,
+              "spacing": "None",
+              "color": "@{if(equals(item()?['Priority'],'Critical'),'attention',if(equals(item()?['Priority'],'Major'),'warning','default'))}"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "@{coalesce(item()?['Status'], '-')}",
+              "size": "Small",
+              "weight": "Bolder",
+              "horizontalAlignment": "Right",
+              "wrap": true,
+              "spacing": "None",
+              "color": "@{if(equals(item()?['Status'],'Interupted'),'attention',if(equals(item()?['Status'],'Held'),'warning',if(or(equals(item()?['Status'],'On-Site'),equals(item()?['Status'],'Departed')),'good','accent')))}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "📍 @{coalesce(item()?['Site Name'], '-')} · @{coalesce(item()?['Province Name'], '-')}",
+      "size": "Small",
+      "wrap": true,
+      "spacing": "None"
+    },
+    {
+      "type": "TextBlock",
+      "text": "🕗 @{coalesce(item()?['Create Time'], '-')}　👷 @{coalesce(item()?['Assign to'], 'Unassigned')}",
+      "size": "Small",
+      "isSubtle": true,
+      "wrap": true,
+      "spacing": "None"
+    }
+  ]
+}

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adaptive Card Preview · CM-TRS Job Tracking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/adaptivecards@3.0.4/dist/adaptivecards.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/adaptivecards-templating@2.3.1/dist/adaptivecards-templating.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f5f8ef; --card:#fff; --ink:#26301c; --muted:#6a7561; --line:#e5ead9;
+  --green:#7cb928; --green-dark:#356b0e; --orange:#f58220;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Sarabun',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.55}
+.wrap{max-width:1280px;margin:0 auto;padding:22px}
+header{background:linear-gradient(120deg,#26301c,#356b0e 55%,#7cb928);color:#f8fff0;border-radius:14px;padding:20px 22px;margin-bottom:18px}
+header h1{font-size:21px;font-weight:800;letter-spacing:.2px}
+header p{opacity:.86;font-size:13.5px;margin-top:4px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.toolbar label{font-weight:600;font-size:13px;color:var(--muted)}
+select,input[type=number]{font-family:inherit;font-size:13.5px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.btn{font-family:inherit;font-size:13.5px;font-weight:600;padding:8px 14px;border:0;border-radius:8px;background:var(--green-dark);color:#fff;cursor:pointer}
+.btn:hover{background:var(--green)}
+.btn.ghost{background:#fff;color:var(--green-dark);border:1px solid var(--green)}
+.file{font-size:13px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media(min-width:1080px){.grid{grid-template-columns:minmax(0,1fr) 360px}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panel h2{font-size:14px;font-weight:700;padding:12px 16px;border-bottom:1px solid var(--line);background:#fafcf6}
+.panel .body{padding:16px}
+#cardHost{background:#f5f5f5;padding:18px;border-radius:10px;min-height:200px}
+.teams-frame{max-width:100%}
+pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.5;background:#1e2b16;color:#dbf0c2;padding:14px;border-radius:8px;overflow:auto;max-height:520px}
+.stat{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.stat:last-child{border-bottom:0}
+.stat b{font-variant-numeric:tabular-nums}
+.warn{background:#fff6e8;border:1px solid #f6d9a8;color:#7a4b06;border-radius:8px;padding:10px 12px;font-size:13px;margin-top:12px}
+.warn.bad{background:#fdecec;border-color:#f3c0c0;color:#8a1f1f}
+.warn.ok{background:#eef8e2;border-color:#cbe3a5;color:#2f5510}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Adaptive Card Preview · CM-TRS Job Tracking</h1>
+  <p>เรนเดอร์การ์ดจริงด้วย adaptivecards.js + adaptivecards-templating · โหลดไฟล์ Excel ของคุณเพื่อดูข้อมูลจริงก่อนขึ้น Power Automate</p>
+</header>
+
+<div class="toolbar">
+  <label for="layout">Layout</label>
+  <select id="layout">
+    <option value="table">ตาราง 8 คอลัมน์ (Desktop)</option>
+    <option value="mobile">การ์ดต่อ Job (Mobile)</option>
+  </select>
+
+  <label for="limit">แสดงสูงสุด</label>
+  <input type="number" id="limit" value="12" min="1" max="60" style="width:80px">
+
+  <label for="file" class="file">โหลด .xlsx</label>
+  <input type="file" id="file" accept=".xlsx,.xlsm,.csv" class="file">
+
+  <button class="btn" id="render">Render</button>
+  <button class="btn ghost" id="copy">คัดลอก JSON การ์ด</button>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <h2>Card Preview</h2>
+    <div class="body">
+      <div id="cardHost"><div class="teams-frame"></div></div>
+      <div id="sizeNote" class="warn">ขนาดการ์ด: —</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel" style="margin-bottom:16px">
+      <h2>สรุปข้อมูลที่ผูกเข้าการ์ด</h2>
+      <div class="body" id="stats"></div>
+    </div>
+    <div class="panel">
+      <h2>Payload JSON (หลัง bind ข้อมูล)</h2>
+      <div class="body"><pre id="json"></pre></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- สำเนา template สำหรับเปิดแบบ file:// (ถ้าเปิดผ่าน http จะ fetch จาก 03/04 ให้อัตโนมัติ) -->
+<script id="fallbackTemplate" type="application/json">
+{"type":"AdaptiveCard","version":"1.4","body":[{"type":"TextBlock","text":"กำลังโหลด template…","wrap":true}]}
+</script>
+
+<script>
+const OPEN_EXCLUDE = ['Closed','Completed','Cancelled','Resolved'];
+const PRIORITY_RANK = { Critical: 0, Major: 1, Minor: 2 };
+const COLS = ['Sub System','Job ID','Priority','Create Time','Status','Province Name','Site Name','Assign to'];
+
+let template = null;      // การ์ดแบบ ${} templating (ไฟล์ 03)
+let rawRows = [];         // แถวดิบจาก Excel หรือ sample
+let lastPayload = null;
+
+/* ---------- โหลด template + sample data ---------- */
+async function boot(){
+  try{
+    const [tpl, sample] = await Promise.all([
+      fetch('03-adaptive-card-templating.json').then(r => r.json()),
+      fetch('04-sample-data.json').then(r => r.json())
+    ]);
+    template = tpl;
+    rawRows = sample.jobs;
+  }catch(err){
+    // เปิดจาก file:// → fetch ถูกบล็อก
+    template = JSON.parse(document.getElementById('fallbackTemplate').textContent);
+    rawRows = [];
+    note('เปิดไฟล์นี้ผ่าน http (เช่น <code>npx serve</code> หรือ GitHub Pages) เพื่อให้โหลด template ได้ หรือกดเลือกไฟล์ .xlsx เพื่อใช้ข้อมูลของคุณเอง', 'bad');
+  }
+  render();
+}
+
+/* ---------- อ่าน Excel ด้วย SheetJS ---------- */
+document.getElementById('file').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const buf = await f.arrayBuffer();
+  const wb = XLSX.read(buf, { type:'array' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  rawRows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
+  render();
+});
+
+/* ---------- สร้าง data object แบบเดียวกับที่ Flow จะส่ง ---------- */
+function buildData(){
+  const limit = Math.max(1, parseInt(document.getElementById('limit').value,10) || 12);
+
+  const open = rawRows.filter(r => !OPEN_EXCLUDE.includes(String(r['Status'] || '').trim()));
+  const sorted = [...open].sort((a,b) =>
+    (PRIORITY_RANK[a['Priority']] ?? 3) - (PRIORITY_RANK[b['Priority']] ?? 3)
+  );
+  const jobs = sorted.slice(0, limit).map(r => {
+    const o = {};
+    COLS.forEach(c => o[c] = String(r[c] ?? '').trim() || '-');
+    return o;
+  });
+
+  const count = p => open.filter(r => String(r['Priority']).trim() === p).length;
+  const statusCount = {};
+  open.forEach(r => {
+    const s = String(r['Status'] || '-').trim();
+    statusCount[s] = (statusCount[s] || 0) + 1;
+  });
+  const statusBreakdown = Object.entries(statusCount)
+    .sort((a,b) => b[1] - a[1]).slice(0,5)
+    .map(([k,v]) => `${k} ${v}`).join(' · ');
+
+  const now = new Date();
+  const fmt = (opts) => now.toLocaleString('en-GB', { timeZone:'Asia/Bangkok', ...opts }).replace(/,/g,'');
+
+  return {
+    reportDate: fmt({ day:'2-digit', month:'short', year:'numeric' }),
+    runTime:    fmt({ day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false }),
+    zone: 'RC3-UDN',
+    region: 'NorthEast',
+    total: open.length,
+    critical: count('Critical'),
+    major: count('Major'),
+    minor: open.length - count('Critical') - count('Major'),
+    shown: jobs.length,
+    more: Math.max(0, open.length - jobs.length),
+    statusBreakdown,
+    jobs
+  };
+}
+
+/* ---------- render ---------- */
+/* ---------- แถวแบบ mobile (เทียบเท่า 07-row-template-mobile.json) ---------- */
+const MOBILE_ROW = {
+  type: 'Container',
+  $data: '${jobs}',
+  separator: true,
+  spacing: 'Small',
+  items: [
+    {
+      type: 'ColumnSet',
+      spacing: 'None',
+      columns: [
+        { type:'Column', width:'auto', items:[
+          { type:'TextBlock', spacing:'None',
+            text: "${if($data['Priority'] == 'Critical', '🔴', if($data['Priority'] == 'Major', '🟠', '🟡'))}" } ] },
+        { type:'Column', width:'stretch', items:[
+          { type:'TextBlock', weight:'Bolder', wrap:true, spacing:'None',
+            text: "${$data['Job ID']} · ${$data['Sub System']}",
+            color: "${if($data['Priority'] == 'Critical', 'attention', if($data['Priority'] == 'Major', 'warning', 'default'))}" } ] },
+        { type:'Column', width:'auto', items:[
+          { type:'TextBlock', size:'Small', weight:'Bolder', horizontalAlignment:'Right', wrap:true, spacing:'None',
+            text: "${$data['Status']}",
+            color: "${if($data['Status'] == 'Interupted', 'attention', if($data['Status'] == 'Held', 'warning', if($data['Status'] == 'On-Site', 'good', if($data['Status'] == 'Departed', 'good', 'accent'))))}" } ] }
+      ]
+    },
+    { type:'TextBlock', size:'Small', wrap:true, spacing:'None',
+      text: "📍 ${$data['Site Name']} · ${$data['Province Name']}" },
+    { type:'TextBlock', size:'Small', isSubtle:true, wrap:true, spacing:'None',
+      text: "🕗 ${$data['Create Time']}　👷 ${$data['Assign to']}" }
+  ]
+};
+
+/** คืน template ตาม layout ที่เลือก: table = ตาม 03 ตรง ๆ, mobile = ตัดหัวตารางออกแล้วสลับแถว */
+function templateForLayout(){
+  if(document.getElementById('layout').value !== 'mobile') return template;
+
+  const t = JSON.parse(JSON.stringify(template));
+  const headerIdx = t.body.findIndex(el =>
+    el.type === 'Container' && el.style === 'emphasis' &&
+    JSON.stringify(el).includes('Province Name'));
+  const rowsIdx = t.body.findIndex(el =>
+    el.type === 'Container' && Array.isArray(el.items) && el.items.some(i => i.$data));
+
+  if(rowsIdx > -1) t.body[rowsIdx].items = [MOBILE_ROW];
+  if(headerIdx > -1) t.body.splice(headerIdx, 1);
+  return t;
+}
+
+function render(){
+  if(!template) return;
+  const data = buildData();
+
+  let cardJson;
+  try{
+    const tpl = new ACData.Template(templateForLayout());
+    cardJson = tpl.expand({ $root: data });
+  }catch(err){
+    note('Template expand ล้มเหลว: ' + err.message, 'bad');
+    return;
+  }
+  lastPayload = cardJson;
+
+  const ac = new AdaptiveCards.AdaptiveCard();
+  ac.hostConfig = new AdaptiveCards.HostConfig({
+    fontFamily: "Sarabun, 'Segoe UI', sans-serif",
+    spacing:{ small:4, default:8, medium:16, large:20, extraLarge:24, padding:14 }
+  });
+  ac.onExecuteAction = (a) => { if(a.url) window.open(a.url, '_blank'); };
+  ac.parse(cardJson);
+
+  const host = document.querySelector('#cardHost .teams-frame');
+  host.innerHTML = '';
+  host.appendChild(ac.render());
+
+  document.getElementById('json').textContent = JSON.stringify(cardJson, null, 2);
+
+  // Teams จำกัดขนาดการ์ดที่ 28 KB
+  const bytes = new Blob([JSON.stringify(cardJson)]).size;
+  const kb = (bytes/1024).toFixed(1);
+  if(bytes > 28*1024)      note(`ขนาดการ์ด <b>${kb} KB</b> — เกินลิมิต 28 KB ของ Teams การ์ดจะไม่ถูกส่ง ให้ลดจำนวนแถวลง`, 'bad');
+  else if(bytes > 22*1024) note(`ขนาดการ์ด <b>${kb} KB</b> — ใกล้ลิมิต 28 KB แล้ว`, '');
+  else                     note(`ขนาดการ์ด <b>${kb} KB</b> / ลิมิต 28 KB — ปลอดภัย`, 'ok');
+
+  document.getElementById('stats').innerHTML = [
+    ['Open jobs ทั้งหมด', data.total],
+    ['🔴 Critical', data.critical],
+    ['🟠 Major', data.major],
+    ['🟡 Minor', data.minor],
+    ['แถวที่แสดงในการ์ด', data.shown],
+    ['ที่เหลือ (ลิงก์ไป Dashboard)', data.more],
+    ['Status breakdown', data.statusBreakdown || '—']
+  ].map(([k,v]) => `<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');
+}
+
+function note(html, kind){
+  const el = document.getElementById('sizeNote');
+  el.className = 'warn' + (kind ? ' ' + kind : '');
+  el.innerHTML = html;
+}
+
+document.getElementById('render').addEventListener('click', render);
+document.getElementById('layout').addEventListener('change', render);
+document.getElementById('limit').addEventListener('change', render);
+document.getElementById('copy').addEventListener('click', async () => {
+  if(!lastPayload) return;
+  await navigator.clipboard.writeText(JSON.stringify(lastPayload, null, 2));
+  const b = document.getElementById('copy');
+  b.textContent = 'คัดลอกแล้ว ✓';
+  setTimeout(() => b.textContent = 'คัดลอก JSON การ์ด', 1600);
+});
+
+boot();
+</script>
+</body>
+</html>
