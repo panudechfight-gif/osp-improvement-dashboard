@@ -1,0 +1,159 @@
+{
+  "comment": "CM-TRS Job Tracking daily card — reference wiring. Compare this against your flow via Peek code. Connection ids under $connections and the two adaptive card bodies are placeholders; everything else (expressions, action names, runAfter chain) is the part that matters.",
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "$connections": { "type": "Object", "defaultValue": {} }
+    },
+    "triggers": {
+      "Recurrence": {
+        "type": "Recurrence",
+        "recurrence": {
+          "frequency": "Day",
+          "interval": 1,
+          "timeZone": "SE Asia Standard Time",
+          "schedule": { "hours": ["21"], "minutes": [54] }
+        },
+        "description": "Time zone must be set on the trigger, not left at UTC, or the date printed on the card slips by a day for evening runs."
+      }
+    },
+    "actions": {
+      "Init_DashboardUrl": {
+        "type": "InitializeVariable",
+        "runAfter": {},
+        "inputs": {
+          "variables": [
+            {
+              "name": "DashboardUrl",
+              "type": "string",
+              "value": "<<< same dashboard link the current card button already uses >>>"
+            }
+          ]
+        }
+      },
+
+      "List_rows_present_in_a_table": {
+        "type": "ApiConnection",
+        "runAfter": { "Init_DashboardUrl": ["Succeeded"] },
+        "inputs": {
+          "host": { "connection": { "name": "@parameters('$connections')['excelonlinebusiness']['connectionId']" } },
+          "method": "get",
+          "path": "/codeless/v1.0/drives/{drive}/items/{file}/workbook/tables/{table}/rows",
+          "queries": {}
+        },
+        "runtimeConfiguration": {
+          "paginationPolicy": { "minimumItemCount": 5000 }
+        },
+        "description": "No $filter / Filter Query on purpose: Status and Create Time are free text in CM-TRS, so OData filtering here silently returns zero rows. Pagination is on because the default cap is 256 rows."
+      },
+
+      "Filter_open_jobs": {
+        "type": "Query",
+        "runAfter": { "List_rows_present_in_a_table": ["Succeeded"] },
+        "inputs": {
+          "from": "@body('List_rows_present_in_a_table')?['value']",
+          "where": "@and(not(equals(trim(coalesce(item()?['Job ID'], '')), '')), not(contains(toLower(coalesce(item()?['Status'], '')), 'done')), not(contains(toLower(coalesce(item()?['Status'], '')), 'closed')))"
+        },
+        "description": "Mirrors the dashboard rule isDone(s) = s contains 'done' or 'closed'. Uses contains, not equals, because real values include 'Done(Not Leave)'. coalesce guards null Status, which would otherwise fail the whole action and starve the condition."
+      },
+
+      "Filter_critical": {
+        "type": "Query",
+        "runAfter": { "Filter_open_jobs": ["Succeeded"] },
+        "inputs": {
+          "from": "@body('Filter_open_jobs')",
+          "where": "@equals(item()?['Priority'], 'Critical')"
+        }
+      },
+
+      "Filter_major": {
+        "type": "Query",
+        "runAfter": { "Filter_critical": ["Succeeded"] },
+        "inputs": {
+          "from": "@body('Filter_open_jobs')",
+          "where": "@equals(item()?['Priority'], 'Major')"
+        }
+      },
+
+      "Filter_minor": {
+        "type": "Query",
+        "runAfter": { "Filter_major": ["Succeeded"] },
+        "inputs": {
+          "from": "@body('Filter_open_jobs')",
+          "where": "@equals(item()?['Priority'], 'Minor')"
+        }
+      },
+
+      "Filter_open_with_time": {
+        "type": "Query",
+        "runAfter": { "Filter_minor": ["Succeeded"] },
+        "inputs": {
+          "from": "@body('Filter_open_jobs')",
+          "where": "@not(equals(trim(coalesce(item()?['Create Time'], '')), ''))"
+        },
+        "description": "WDL if() evaluates every argument, so rows with a blank Create Time must be removed before parseDateTime runs in Filter_over_sla."
+      },
+
+      "Filter_over_sla": {
+        "type": "Query",
+        "runAfter": { "Filter_open_with_time": ["Succeeded"] },
+        "inputs": {
+          "from": "@body('Filter_open_with_time')",
+          "where": "@less(formatDateTime(addHours(parseDateTime(item()?['Create Time'], 'en-US', 'dd-MMM-yy HH:mm'), if(equals(item()?['Priority'], 'Critical'), 3, if(equals(item()?['Priority'], 'Major'), 10, 72))), 'yyyy-MM-ddTHH:mm:ss'), formatDateTime(convertTimeZone(utcNow(), 'UTC', 'SE Asia Standard Time'), 'yyyy-MM-ddTHH:mm:ss'))"
+        },
+        "description": "SLA hours match the dashboard: Critical 3, Major 10, Minor 72. Both sides are formatted to the same string shape before comparison."
+      },
+
+      "Select_job_lines": {
+        "type": "Select",
+        "runAfter": { "Filter_over_sla": ["Succeeded"] },
+        "inputs": {
+          "from": "@take(union(union(body('Filter_critical'), body('Filter_major')), body('Filter_minor')), 10)",
+          "select": "@concat('- **', coalesce(item()?['Job ID'], '-'), '** · ', coalesce(item()?['Priority'], '-'), ' · ', coalesce(item()?['Province Name'], '-'), ' · ', coalesce(item()?['Status'], '-'), ' · ', coalesce(item()?['Assign to'], 'ยังไม่ระบุผู้รับผิดชอบ'))"
+        },
+        "description": "Adaptive Card cannot loop, so the job list is flattened to markdown bullets here and joined in the card. union() concatenates the three priority buckets in order, giving a severity-sorted top 10."
+      },
+
+      "Has_Open_Jobs": {
+        "type": "If",
+        "runAfter": { "Select_job_lines": ["Succeeded"] },
+        "expression": "@greater(length(body('Filter_open_jobs')), 0)",
+        "description": "Advanced mode only. A basic condition card stores the right-hand value as a string, so length() (an integer) compared against \"0\" evaluates false forever. Must be body(), not outputs() — outputs() is the wrapper object and length() cannot read it.",
+        "actions": {
+          "Post_card_open_jobs": {
+            "type": "ApiConnection",
+            "runAfter": {},
+            "inputs": {
+              "host": { "connection": { "name": "@parameters('$connections')['teams']['connectionId']" } },
+              "method": "post",
+              "path": "/v1.0/teams/conversation/adaptivecard/poster/Flow bot/location/@{encodeURIComponent('Channel')}",
+              "body": {
+                "recipient": { "groupId": "<<< team id >>>", "channelId": "<<< channel id >>>" },
+                "messageBody": "<<< paste the contents of card-open-jobs.json here >>>"
+              }
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "Post_card_no_open_jobs": {
+              "type": "ApiConnection",
+              "runAfter": {},
+              "inputs": {
+                "host": { "connection": { "name": "@parameters('$connections')['teams']['connectionId']" } },
+                "method": "post",
+                "path": "/v1.0/teams/conversation/adaptivecard/poster/Flow bot/location/@{encodeURIComponent('Channel')}",
+                "body": {
+                  "recipient": { "groupId": "<<< team id >>>", "channelId": "<<< channel id >>>" },
+                  "messageBody": "<<< paste the contents of card-no-open-jobs.json here >>>"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {}
+  }
+}
