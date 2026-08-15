@@ -140,13 +140,20 @@ document.getElementById('file').addEventListener('change', async (e) => {
 function buildData(){
   const limit = Math.max(1, parseInt(document.getElementById('limit').value,10) || 12);
 
-  const open = rawRows.filter(r => !OPEN_EXCLUDE.includes(String(r['Status'] || '').trim()));
+  // Data validation: clean any null/undefined/empty cells
+  const clean = (val) => {
+    if (val === null || val === undefined) return '-';
+    const s = String(val).trim();
+    return s === '' || s === 'None' || s === 'null' ? '-' : s;
+  };
+
+  const open = rawRows.filter(r => !OPEN_EXCLUDE.includes(clean(r['Status'])));
   const sorted = [...open].sort((a,b) =>
-    (PRIORITY_RANK[a['Priority']] ?? 3) - (PRIORITY_RANK[b['Priority']] ?? 3)
+    (PRIORITY_RANK[clean(a['Priority'])] ?? 3) - (PRIORITY_RANK[clean(b['Priority'])] ?? 3)
   );
   const jobs = sorted.slice(0, limit).map(r => {
     const o = {};
-    COLS.forEach(c => o[c] = String(r[c] ?? '').trim() || '-');
+    COLS.forEach(c => o[c] = clean(r[c]));
     return o;
   });
 
@@ -288,11 +295,30 @@ function render(){
 
   let cardJson;
   try{
+    // Validate data before expansion
+    if (!data.jobs || !Array.isArray(data.jobs)) {
+      throw new Error('Jobs array is missing or invalid');
+    }
+
+    // Ensure all job objects have required fields
+    data.jobs = data.jobs.map(j => ({
+      'Sub System': j['Sub System'] || '-',
+      'Job ID': j['Job ID'] || '-',
+      'Priority': j['Priority'] || 'Minor',
+      'Create Time': j['Create Time'] || '-',
+      'Status': j['Status'] || '-',
+      'Province Name': j['Province Name'] || '-',
+      'Site Name': j['Site Name'] || '-',
+      'Assign to': j['Assign to'] || '-'
+    }));
+
     const tpl = new ACData.Template(tmpl);
     cardJson = tpl.expand({ $root: data });
   }catch(err){
-    console.error('Template expand error:', err, 'Template:', tmpl);
-    note('Template expand ล้มเหลว: ' + err.message + ' — ลองเปลี่ยน layout หรือโหลดไฟล์ .xlsx ใหม่', 'bad');
+    console.error('Template expand error:', err);
+    console.error('Data:', data);
+    console.error('Template body items:', tmpl?.body?.length);
+    note('Template expand ล้มเหลว: ' + err.message + '<br><small>เปิด browser console (F12) เพื่อดูรายละเอียด</small>', 'bad');
     return;
   }
   lastPayload = cardJson;
