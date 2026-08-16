@@ -12,7 +12,8 @@ Template Adaptive Card + คู่มือทำ Flow ใน Power Automate แ
 | `01-card-template.json` | การ์ดแบบ **Templating syntax** (`${...}`, `$data`) | ใช้ดูตัวอย่าง/ออกแบบใน [Adaptive Cards Designer](https://adaptivecards.io/designer/) |
 | `02-sample-data.json` | ข้อมูลตัวอย่าง (ดึงจากไฟล์ Excel จริง 29 job) | วางใน **Sample Data Editor** ของ Designer |
 | `03-select-map.json` | JSON สำหรับ action **Select** (สร้างแถวตาราง) | วางในช่อง **Map** ของ Select |
-| `04-card-powerautomate.json` | การ์ดฉบับ **ใช้งานจริงใน Flow** (ฝัง expression `@{...}`) | วางใน **Compose** ชื่อ `Card_JSON` |
+| `04-card-powerautomate.json` | การ์ดฉบับ **ใช้งานจริงใน Flow** (ฝัง expression `@{...}`) | วางใน **Compose** ชื่อ `Card_JSON` - **Desktop/Tablet** |
+| `05-card-powerautomate-mobile.json` | การ์ดฉบับ **Mobile-optimized** (3 columns: Job ID, Priority, Status) | วางใน **Compose** ชื่อ `Card_JSON` - **Mobile only** |
 
 ---
 
@@ -29,11 +30,37 @@ Template Adaptive Card + คู่มือทำ Flow ใน Power Automate แ
 | ไฟล์ | Syntax | เอาไปใช้กับ |
 |---|---|---|
 | `01-card-template.json` | `${jobs}` | Designer, Bot Framework, Power Apps |
-| `04-card-powerautomate.json` | `@{body('Select_Rows')}` | **Power Automate ← ใช้อันนี้** |
+| `04-card-powerautomate.json` | `@{body('Select_Rows')}` | **Power Automate ← ใช้อันนี้ (Desktop/Tablet)** |
 
 ---
 
-## 🎯 คอลัมน์ที่แสดงบนการ์ด (ตาม Focus ที่กำหนด)
+## 💻 Desktop vs 📱 Mobile Version
+
+### **04-card-powerautomate.json** (Desktop/Tablet)
+- **8 columns:** Sub System, Job ID, Priority, Create Time, Status, Province, Site Name, Assign to
+- **ใช้ได้บน:** Teams Desktop, Tablet
+- **พลาด:** Mobile แคบเกินไป ข้อมูลอาจ overlap
+
+### **05-card-powerautomate-mobile.json** (Mobile-Optimized ✨ NEW)
+- **3 columns:** Job ID, Priority, Status (ข้อมูลสำคัญที่สุด)
+- **ใช้ได้บน:** Teams Mobile, WhatsApp, Slack
+- **ลด:** Font size เล็กลง, Remove columns ที่ไม่จำเป็น
+- **เพิ่ม:** Emoji ไอคอนใหญ่, wrap text ดีขึ้น
+
+### 🔧 **วิธีเลือก version:**
+
+**ถ้า Flow ส่งไป Teams ทั่ว ๆ ไป:**
+- แก้ Compose ให้ใช้ `05-card-powerautomate-mobile.json` แทน (ให้เหมาะกับทั้ง Desktop + Mobile)
+
+**ถ้า Flow ส่งไปอื่นนอกจาก Teams (WhatsApp, Email):**
+- ใช้ `05-card-powerautomate-mobile.json` เสมอ
+
+**ถ้าเฉพาะ Desktop users เท่านั้น:**
+- ยังคงใช้ `04-card-powerautomate.json` ได้
+
+---
+
+## 🎯 คอลัมน์ที่แสดงบนการ์ด
 
 | # | Header | คอลัมน์ใน Excel | น้ำหนักความกว้าง |
 |---|---|---|---|
